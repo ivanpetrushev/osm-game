@@ -14,6 +14,11 @@ App::uses('Shell', 'Console');
 class FixesShell extends AppShell {
     public $uses = array('City');
     
+    public function test_cities(){
+        $tmp = $this->City->find('all');
+        print_r($tmp);
+    }
+    
     public function fetch_cities(){
         $this->City->query('TRUNCATE TABLE cities');
         

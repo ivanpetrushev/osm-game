@@ -1,3 +1,4 @@
 /nbproject/
 /app/tmp/
 /app/webroot/files/
+/app/Config/database.php
