@@ -29,6 +29,6 @@
     <div id="generatedQuery"></div>
     
     <script src="https://code.jquery.com/jquery-2.2.0.min.js" type="text/javascript"></script>
-    <script src="/js/custom.js" type="text/javascript"></script>
+    <script src="/assets/js/custom.js" type="text/javascript"></script>
 </body>
 </html>
