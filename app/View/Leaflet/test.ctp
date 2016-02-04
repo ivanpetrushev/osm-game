@@ -55,43 +55,38 @@
             canvasTiles.drawTile = function (canvas, tilePoint, zoom) {
 //                console.log('canvas', canvas)
                 var tileSize = this.options.tileSize;
-
-                // add fog - possibly use http://projects.calebevans.me/jcanvas/docs/addLayers/ 
-                var cFog = document.createElement('canvas');
-                cFog.width = tileSize;
-                cFog.height = tileSize;
-                cFog.style.top = canvas.style.top;
-                cFog.style.left = canvas.style.left;
-                cFog.class = "leaflet-tile leaflet-tile-loaded fog";
-                
-                var ctxFog = cFog.getContext('2d');
-                // add fog of war
-                var pattern = ctxFog.createPattern(document.getElementById('fillPattern'), 'repeat');
-                ctxFog.rect(0, 0, tileSize, tileSize);
-                ctxFog.fillStyle = pattern;
-                ctxFog.fill();
-                
-                
-                // draw something on base layer
                 var ctx = canvas.getContext('2d');
-                // add debug text
-                ctx.fillText(tilePoint.toString(), 50, 50);
-                
-                // add sample borders
-                ctx.globalAlpha = 0.2;
-                ctx.fillStyle = '#000';
-                ctx.fillRect(10, 10, 246, 246);
-                
-                // add test rect
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#f00';
-                ctx.fillRect(10, 15, 10, 15);
+
+                // draw fog of war
+                var pattern = ctx.createPattern(document.getElementById('fillPattern'), 'repeat');
+                ctx.fillStyle = pattern;
+                ctx.fillRect(0, 0, tileSize, tileSize);
                 
                 var oCoords = map.layerPointToLatLng(tilePoint);
                 $(canvas).attr('data-lat', oCoords.lat);
                 $(canvas).attr('data-lng', oCoords.lng);
                 $(canvas).attr('data-zoom', zoom);
                 $(canvas).attr('id', 'tile-'+ Math.round(Math.random() * 100000000))
+                
+                $(canvas).attr('data-clear-x', 0)
+                $(canvas).attr('data-clear-y', 0)
+        
+        /*
+                setInterval(function(){
+                    var x = parseInt($(canvas).attr('data-clear-x'));
+                    var y = parseInt($(canvas).attr('data-clear-x'));
+                    $(canvas).attr('data-clear-x', x+10);
+                    $(canvas).attr('data-clear-y', y+10);
+                    
+                    var context = ctx;
+                    context.save();
+                    context.globalCompositeOperation = 'destination-out';
+                    context.beginPath();
+                    context.arc(x, y, 50, 0, 2 * Math.PI, false);
+                    context.fill();
+                    context.restore();
+                }, 300)
+                */
                 
 //                console.log(tilePoint, map.layerPointToLatLng(tilePoint))
             };
@@ -111,6 +106,7 @@
             })
             
             function move(dir){
+                // move marker
                 var angle = 0;
                 switch(dir){
                     case 'up': angle = 0; break;
@@ -120,9 +116,15 @@
                 }
                 var oCurrentCoords = mPlayer.getLatLng();
                 var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, 10, angle);
-//                console.log('move', dir, oCurrentCoords, oNewCoords);
+                console.log('move', dir, oCurrentCoords, oNewCoords);
                 mPlayer.setLatLng(oNewCoords);
                 map.panTo(oNewCoords);
+                console.log(mPlayer)
+                
+                // find which tile are we at
+                $('.leaflet-tile').each(function(x){
+                    console.log($(this).attr('data-lat'))
+                });
             }
             
             function getMoveLatLng(lat, lng, d, angle){
