@@ -63,6 +63,8 @@
                 ctx.fillRect(0, 0, tileSize, tileSize);
                 
                 var oCoords = map.layerPointToLatLng(tilePoint);
+                L.marker(oCoords).addTo(map);
+                console.log('tile coords', oCoords)
                 $(canvas).attr('data-lat', oCoords.lat);
                 $(canvas).attr('data-lng', oCoords.lng);
                 $(canvas).attr('data-zoom', zoom);
@@ -116,14 +118,20 @@
                 }
                 var oCurrentCoords = mPlayer.getLatLng();
                 var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, 10, angle);
-                console.log('move', dir, oCurrentCoords, oNewCoords);
+//                console.log('move', dir, oCurrentCoords, oNewCoords);
                 mPlayer.setLatLng(oNewCoords);
                 map.panTo(oNewCoords);
-                console.log(mPlayer)
+                console.log('player', mPlayer)
                 
                 // find which tile are we at
                 $('.leaflet-tile').each(function(x){
-                    console.log($(this).attr('data-lat'))
+                    var lat = $(this).attr('data-lat');
+                    var lng = $(this).attr('data-lng');
+                    if (typeof lat == 'undefined' || typeof lng == 'undefined') return;
+                    var id = $(this).attr('id');
+//                    if (lat < oNewCoords.lat) return;
+//                    if (lng < oNewCoords.lng) return;
+                    console.log(lat, lng, id, 'vs', oNewCoords);
                 });
             }
             
