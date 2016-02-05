@@ -4,7 +4,7 @@
         <title>Create layers using HTML5 canvas</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
-        <script src='https://code.jquery.com/jquery-2.2.0.min.js'></script>
+        <script src='/assets/js/jquery-2.2.0.min.js'></script>
         
         <link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
         <style>
@@ -34,7 +34,7 @@
             });
             map.setView([42.3619, -71.0606], 17);
             
-            //*
+            /*
             // Disable drag and zoom handlers.
             map.dragging.disable();
             map.touchZoom.disable();
@@ -62,12 +62,17 @@
                 ctx.fillStyle = pattern;
                 ctx.fillRect(0, 0, tileSize, tileSize);
                 
-                var oCoords = map.layerPointToLatLng(tilePoint);
-                L.marker(oCoords).addTo(map);
-                console.log('tile coords', oCoords)
+//                var oCoords = map.layerPointToLatLng(tilePoint); // wrong ?
+                var oCoords = {
+                    lat: tile2lat(tilePoint.y, zoom),
+                    lng: tile2long(tilePoint.x, zoom),
+                }
+//                L.marker(oCoords).addTo(map);
                 $(canvas).attr('data-lat', oCoords.lat);
                 $(canvas).attr('data-lng', oCoords.lng);
-                $(canvas).attr('data-zoom', zoom);
+                $(canvas).attr('data-tile-x', tilePoint.x);
+                $(canvas).attr('data-tile-y', tilePoint.y);
+                $(canvas).attr('data-tile-zoom', zoom);
                 $(canvas).attr('id', 'tile-'+ Math.round(Math.random() * 100000000))
                 
                 $(canvas).attr('data-clear-x', 0)
@@ -127,11 +132,30 @@
                 $('.leaflet-tile').each(function(x){
                     var lat = $(this).attr('data-lat');
                     var lng = $(this).attr('data-lng');
+                    var tile_x = parseInt($(this).attr('data-tile-x'));
+                    var tile_y = parseInt($(this).attr('data-tile-y'));
+                    var tile_zoom = parseInt($(this).attr('data-tile-zoom'));
+                    var tile_id = $(this).attr('id');
+                    
                     if (typeof lat == 'undefined' || typeof lng == 'undefined') return;
-                    var id = $(this).attr('id');
-//                    if (lat < oNewCoords.lat) return;
-//                    if (lng < oNewCoords.lng) return;
-                    console.log(lat, lng, id, 'vs', oNewCoords);
+                    console.log(oNewCoords)
+                    
+                    var top_lat = tile2lat(tile_y, tile_zoom);
+                    var top_lng = tile2long(tile_x, tile_zoom);
+                    var bottom_lat = tile2lat(tile_y+1, tile_zoom);
+                    var bottom_lng = tile2long(tile_x+1, tile_zoom);
+//                    console.log(top_lat, bottom_lat, ' vs ', top_lng, bottom_lng, tile_zoom)
+                    console.log(top_lat, bottom_lat, ' vs ', parseFloat(oNewCoords.lat))
+                    
+                    if (top_lat < parseFloat(oNewCoords.lat) && parseFloat(oNewCoords.lat) < bottom_lat){
+                        console.log('found? ', tile_id)
+                        L.marker([top_lat, top_lng]).addTo(map);
+                    }
+                    
+                    if (lat < oNewCoords.lat) return;
+                    if (lng < oNewCoords.lng) return;
+//                    console.log(lat, lng, id, 'vs', oNewCoords);
+//                    L.marker([lat, lng]).addTo(map);
                 });
             }
             
@@ -160,6 +184,14 @@
                     lat: new_lat,
                     lng: new_lon
                 }
+            }
+            
+            function tile2long(x,z) {
+                return (x/Math.pow(2,z)*360-180);
+            }
+            function tile2lat(y,z) {
+                var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
+                return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
             }
         </script>
     </body>
