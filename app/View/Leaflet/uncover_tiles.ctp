@@ -32,7 +32,7 @@
             var map = L.mapbox.map('ctMap', oTileJson, {
                 zoomControl: false
             });
-            map.setView([42.3619, -71.0606], 17);
+            map.setView([42.1445, 24.74412], 17);
             
             /*
             // Disable drag and zoom handlers.
@@ -100,7 +100,8 @@
 
             canvasTiles.addTo(map);
             
-            var mPlayer = L.marker([42.3619, -71.0606]).addTo(map);
+            var mPlayer = L.marker([42.1445, 24.74412]).addTo(map);
+            uncoverFOW();
             
             $(document).ready(function(){
                 $(document).keydown(function(e){
@@ -126,37 +127,9 @@
 //                console.log('move', dir, oCurrentCoords, oNewCoords);
                 mPlayer.setLatLng(oNewCoords);
                 map.panTo(oNewCoords);
-                console.log('player', mPlayer)
+                console.log('player', mPlayer);
                 
-                // find which tile are we at
-                $('.leaflet-tile').each(function(x){
-                    var lat = $(this).attr('data-lat');
-                    var lng = $(this).attr('data-lng');
-                    var tile_x = parseInt($(this).attr('data-tile-x'));
-                    var tile_y = parseInt($(this).attr('data-tile-y'));
-                    var tile_zoom = parseInt($(this).attr('data-tile-zoom'));
-                    var tile_id = $(this).attr('id');
-                    
-                    if (typeof lat == 'undefined' || typeof lng == 'undefined') return;
-                    console.log(oNewCoords)
-                    
-                    var top_lat = tile2lat(tile_y, tile_zoom);
-                    var top_lng = tile2long(tile_x, tile_zoom);
-                    var bottom_lat = tile2lat(tile_y+1, tile_zoom);
-                    var bottom_lng = tile2long(tile_x+1, tile_zoom);
-//                    console.log(top_lat, bottom_lat, ' vs ', top_lng, bottom_lng, tile_zoom)
-                    console.log(top_lat, bottom_lat, ' vs ', parseFloat(oNewCoords.lat))
-                    
-                    if (top_lat < parseFloat(oNewCoords.lat) && parseFloat(oNewCoords.lat) < bottom_lat){
-                        console.log('found? ', tile_id)
-                        L.marker([top_lat, top_lng]).addTo(map);
-                    }
-                    
-                    if (lat < oNewCoords.lat) return;
-                    if (lng < oNewCoords.lng) return;
-//                    console.log(lat, lng, id, 'vs', oNewCoords);
-//                    L.marker([lat, lng]).addTo(map);
-                });
+                uncoverFOW();
             }
             
             function getMoveLatLng(lat, lng, d, angle){
@@ -192,6 +165,55 @@
             function tile2lat(y,z) {
                 var n=Math.PI-2*Math.PI*y/Math.pow(2,z);
                 return (180/Math.PI*Math.atan(0.5*(Math.exp(n)-Math.exp(-n))));
+            }
+            
+            function uncoverFOW(){
+                var oNewCoords = mPlayer.getLatLng();
+                
+                // find which tile are we at
+                $('.leaflet-tile').each(function(x){
+                    var lat = $(this).attr('data-lat');
+                    var lng = $(this).attr('data-lng');
+                    var tile_x = parseInt($(this).attr('data-tile-x'));
+                    var tile_y = parseInt($(this).attr('data-tile-y'));
+                    var tile_zoom = parseInt($(this).attr('data-tile-zoom'));
+                    var tile_id = $(this).attr('id');
+                    
+                    if (typeof lat == 'undefined' || typeof lng == 'undefined') return;
+                    
+                    var top_lat = tile2lat(tile_y, tile_zoom);
+                    var top_lng = tile2long(tile_x, tile_zoom);
+                    var bottom_lat = tile2lat(tile_y+1, tile_zoom); 
+                    var bottom_lng = tile2long(tile_x+1, tile_zoom);
+//                    console.log(top_lat, bottom_lat, ' vs ', top_lng, bottom_lng, tile_zoom)
+//                    console.log('this', top_lng, 'east', bottom_lng, ' coords lng', parseFloat(oNewCoords.lng))
+
+                    if (top_lat > parseFloat(oNewCoords.lat) && parseFloat(oNewCoords.lat) > bottom_lat){
+                        if (top_lng < parseFloat(oNewCoords.lng) && parseFloat(oNewCoords.lng) < bottom_lng){
+//                            console.log('possible found? ', tile_id)
+
+//                            L.marker([top_lat, top_lng]).addTo(map); // debug
+                            var x = map.project(oNewCoords, tile_zoom)
+//                            console.log('prkiect? ', x, tile_x, tile_y)
+                            var offsetTile = $('#'+tile_id).offset();
+                            var offsetPlayer = $(mPlayer._icon).offset();
+//                            console.log('offsetTile', offsetTile, 'offsetPlayer',  offsetPlayer)
+                            
+                            var iLocalX = offsetPlayer.left - offsetTile.left;
+                            var iLocalY = offsetPlayer.top - offsetTile.top;
+//                            console.log('local x', iLocalX, 'local y', iLocalY)
+                            
+                            var context = document.getElementById(tile_id).getContext('2d');
+                            context.save();
+                            context.globalCompositeOperation = 'destination-out';
+                            context.beginPath();
+                            var iRadius = 500; // 50
+                            context.arc(iLocalX, iLocalY, iRadius, 0, 2 * Math.PI, false);
+                            context.fill();
+                            context.restore();
+                        }
+                    }
+                });
             }
         </script>
     </body>
