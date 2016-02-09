@@ -91,7 +91,7 @@
                 var oStartLatLng = mPlayer.getLatLng();
                 var sQuery = '[out:json][timeout:25];'+
                             '('+
-                              'node["railway"="station"](around: 6000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
+                              'node["railway"~"station|halt"](around: 10000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
                             ');'+
                             'out body;'
                 console.log('fire', sQuery)
