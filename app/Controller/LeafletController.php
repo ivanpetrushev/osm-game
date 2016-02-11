@@ -16,6 +16,10 @@ class LeafletController extends AppController {
         
     }
     
+    public function enemies(){
+        
+    }
+    
     public function get_random_city(){
         $tmp = $this->City->find('first', array(
             'order' => 'RAND()'
