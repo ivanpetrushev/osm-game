@@ -93,19 +93,58 @@
                 var oStartLatLng = mPlayer.getLatLng();
                 var sQuery = '[out:json][timeout:25];'+
                             '('+
-                              'node["railway"="station"](around: 6000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
+                              'node["railway"~"station|halt"](around: 10000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
+                              'way["railway"~"station|halt"](around: 10000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
                             ');'+
-                            'out body;'
+                            '(._;>;);'+
+                            'out body;'+
+                            '>;'
                 $.ajax({
                     url: 'https://www.overpass-api.de/api/interpreter?data='+sQuery,
                     dataType: 'json',
                     crossDomain: true,
                     success: function(res){
-                        if (res.elements.length > 0){
-                            $('#infoPanel').append('<br /> '+res.elements.length+ ' targets around! <br /><div id="distance"></div><div id="enemies"></div>');
-                            for(var i in res.elements){
-                                var oTarget = res.elements[i];
-                                aTargetLocations.push(oTarget);
+                        var aChildNodes = [];
+                        for (var i in res.elements){
+                            var el = res.elements[i];
+                            if (el.type == 'node' && typeof el.tags != 'undefined' && el.tags.railway != 'undefined'){
+                                aTargetLocations.push(el);
+                            }
+                            if (el.type == 'node' && typeof el.tags == 'undefined'){
+                                aChildNodes.push(el);
+                            }
+                        }
+                        
+                        
+                        // scan child nodes for ways
+                        for (var i in res.elements){
+                            var el = res.elements[i];
+                            if (el.type == 'way'){
+                                var iCentralLat = 0;
+                                var iCentralLon = 0;
+                                var iCntNodes = 0;
+                                for (var j in el.nodes){
+                                    for (var k in aChildNodes){
+                                        if (el.nodes[j] == aChildNodes[k].id){
+                                            iCentralLat += parseFloat(aChildNodes[k].lat);
+                                            iCentralLon += parseFloat(aChildNodes[k].lon);
+                                            iCntNodes++;
+                                        }
+                                    }
+                                }
+                                
+                                iCentralLat /= iCntNodes;
+                                iCentralLon /= iCntNodes;
+                                
+                                var o = {lat: iCentralLat, lon: iCentralLon};
+                                aTargetLocations.push(o);
+                            }
+                        }
+                        
+                        if (aTargetLocations.length > 0){
+                            $('#infoPanel').append('<br /> '+aTargetLocations.length+ ' targets around! <br /><div id="distance"></div><div id="enemies"></div>');
+                            for(var i in aTargetLocations){
+                                var oTarget = aTargetLocations[i];
                                 var icon = L.icon({
                                     iconUrl: '/img/icons/16x16/add_green.png'
                                 })
