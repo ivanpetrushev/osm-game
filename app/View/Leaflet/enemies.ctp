@@ -160,13 +160,13 @@
                 // move marker
                 var angle = 0;
                 switch(dir){
-                    case 'up': angle = 0; break;
-                    case 'right': angle = 90; break;
-                    case 'down': angle = 180; break;
-                    case 'left': angle = 270; break;
+                    case 'up': iAngle = 0; break;
+                    case 'right': iAngle = 90; break;
+                    case 'down': iAngle = 180; break;
+                    case 'left': iAngle = 270; break;
                 }
                 var oCurrentCoords = mPlayer.getLatLng();
-                var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, 10, angle);
+                var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, 10, iAngle);
                 mPlayer.setLatLng(oNewCoords);
                 map.panTo(oNewCoords);
                 
@@ -188,19 +188,37 @@
                     alert('You win!')
                 }
                 
-                // move enemies
+                // move enemies using "Change in LOS rate" algorithm
                 var oBounds = map.getBounds();
                 for (var i in aEnemies){
                     var oEnemyLatLng = aEnemies[i].getLatLng();
                     if (oBounds.contains(oEnemyLatLng)){
-                        var angle = bearing(oEnemyLatLng.lat, oEnemyLatLng.lng, oNewCoords.lat, oNewCoords.lng);
+                        // if distance is below 20 consider the player dead
+                        var iOldDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
                         
-                        var oMoveCoords = getMoveLatLng(oEnemyLatLng.lat, oEnemyLatLng.lng, 8, angle);
+                        var iAngle = bearing(oEnemyLatLng.lat, oEnemyLatLng.lng, oNewCoords.lat, oNewCoords.lng);
+                        var iComputedAngle = iAngle;
+                        var iLosDiff = 0;
+                        if (typeof aEnemies[i].last_angle == 'undefined'){
+                            aEnemies[i].last_angle = iAngle;
+                        }
+                        
+                        iLosDiff = Math.abs(iAngle - aEnemies[i].last_angle);
+                        if (iLosDiff > 1 && iOldDistance > 100){ // correct for interception
+                            if (iAngle > aEnemies[i].last_angle) {
+                                iComputedAngle = iAngle + 20 * iLosDiff;
+                            }
+                            else {
+                                iComputedAngle = iAngle - 20 * iLosDiff;
+                            }
+                        }
+                        aEnemies[i].last_angle = iAngle;
+                        
+                        var oMoveCoords = getMoveLatLng(oEnemyLatLng.lat, oEnemyLatLng.lng, 8, iComputedAngle);
                         aEnemies[i].setLatLng(oMoveCoords);
                         
-                        // if distance is below 20 consider the player dead
-                        var sDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
-                        if (sDistance < 20){
+                        var iNewDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
+                        if (iNewDistance < 20){
                             alert('You die!');
                         }
                     }
