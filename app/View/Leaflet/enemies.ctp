@@ -123,9 +123,9 @@
                 <tr><th>Player</th><th>Time</th><th>City</th></tr>
                 <? foreach ($scores as $item):?>
                 <tr>
-                    <td><?=htmlentities($item['Score']['player_name'])?></td>
-                    <td><?=htmlentities($item['Score']['time'])?></td>
-                    <td><?=htmlentities($item['Score']['city_name'])?></td>
+                    <td><?=htmlentities($item['Score']['player_name'], ENT_QUOTES, "UTF-8")?></td>
+                    <td><?=htmlentities($item['Score']['time'], ENT_QUOTES, "UTF-8")?></td>
+                    <td><?=htmlentities($item['Score']['city_name'], ENT_QUOTES, "UTF-8")?></td>
                 </tr>
                 <? endforeach; ?>
             </table>
