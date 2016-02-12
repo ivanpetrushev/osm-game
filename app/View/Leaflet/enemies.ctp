@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset=utf-8 />
@@ -113,7 +114,7 @@
                 <input type="hidden" name="time" />
                 <input type="hidden" name="cnt_moves" />
                 <input type="hidden" name="cnt_enemies" />
-                Player name: <input type="text" name="player_name" required maxlength="3"/> <br />
+                Player name: <input type="text" name="player_name" required maxlength="3" autocomplete="off"/> <br />
                 <input type="submit" />
             </form>
         </div>
