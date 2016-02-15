@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset=utf-8 />
-        <title>Enemies</title>
+        <title>Pursuit</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
         <script src='/assets/js/Leaflet.MakiMarkers.js'></script>
@@ -158,19 +158,30 @@
             // Disable tap handler, if present.
             if (map.tap) map.tap.disable();
             
-            var oIconGreen = L.MakiMarkers.icon({
+            var oIconEnemyGreen = L.MakiMarkers.icon({
                 icon: "rocket",
                 color: "#0b0",
                 size: "m"
             });
-            var oIconRed = L.MakiMarkers.icon({
+            var oIconEnemyRed = L.MakiMarkers.icon({
                 icon: "rocket",
                 color: "#f00",
                 size: "m"
             });
             
+            var oIconPlayerMoving = L.MakiMarkers.icon({
+                icon: "pitch",
+                color: "#00f",
+                size: "m"
+            });
+            var oIconPlayerBlocked = L.MakiMarkers.icon({
+                icon: "cross",
+                color: "#00f",
+                size: "m"
+            });
+            
             // add player and ability to move it
-            var mPlayer = L.marker();
+            var mPlayer = L.marker().setIcon(oIconPlayerMoving);
             $(document).ready(function(){
                 $(document).keydown(function(e){
                     if (e.keyCode == 37) move('left');
@@ -201,8 +212,8 @@
                         mPlayer.setLatLng([lat, lng]).addTo(map);
                         $('#infoPanel').html('Welcome to '+res.data.name+', population: '+res.data.population +'. Find nearest train station!').fadeIn();
                         $('input[name="city_name"]').val(res.data.name);
-                        fetch_buildings();
-                        //fetch_targets();
+                        //fetch_buildings();
+                        fetch_targets();
                         
                         tsGameStart = new Date().getTime();
                     }
@@ -272,7 +283,8 @@
                                 L.circle([oTarget.lat, oTarget.lon], 100).addTo(map);
                             }
                             
-                            fetch_enemies();
+//                            fetch_enemies();
+                            fetch_buildings();
                         }
                         else {
                             $('#infoPanel').append('<br /> No targets around! Automatically restarting...');
@@ -337,7 +349,7 @@
                             L.geoJson(oFeature, style).addTo(map);
                         }
                         
-                        fetch_targets();
+                        fetch_enemies();
                     }
                 })
             }
@@ -357,7 +369,7 @@
                         if (res.elements.length > 0){
                             $('#enemies').html(res.elements.length + ' enemies found!');
                             for(var i in res.elements){
-                                var oEnemy = L.marker([res.elements[i].lat, res.elements[i].lon], {icon: oIconRed});
+                                var oEnemy = L.marker([res.elements[i].lat, res.elements[i].lon], {icon: oIconEnemyRed});
                                 oEnemy.addTo(map);
                                 aEnemies.push(oEnemy);
                             }
@@ -372,7 +384,7 @@
             function move(dir){
                 if (! bGameRunning) return;
                 // move marker
-                var angle = 0;
+                var iAngle = 0;
                 switch(dir){
                     case 'up': iAngle = 0; break;
                     case 'right': iAngle = 90; break;
@@ -381,8 +393,22 @@
                 }
                 var oCurrentCoords = mPlayer.getLatLng();
                 var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, 10, iAngle);
+                for (var i in aBuildingWayElements){
+                    var aNodeList = [];
+                    for (var j in aBuildingWayElements[i].nodes){
+                        aNodeList.push([aBuildingWayElements[i].nodes[j].lat, aBuildingWayElements[i].nodes[j].lon])
+                    }
+                    if (is_in_polygon([oNewCoords.lat, oNewCoords.lng], aNodeList)){
+                        mPlayer.setIcon(oIconPlayerBlocked);
+                        return;
+                    }
+                    else {
+                        mPlayer.setIcon(oIconPlayerMoving);
+                    }
+                }
+                
                 mPlayer.setLatLng(oNewCoords);
-//                map.panTo(oNewCoords);
+//                map.panTo(oNewCoords); // do it a bit slower down there
                 
                 if (typeof mPlayer.cnt_moves == 'undefined'){
                     mPlayer.cnt_moves = 0;
@@ -426,14 +452,18 @@
                 var oBounds = map.getBounds();
                 for (var i in aEnemies){
                     var oEnemyLatLng = aEnemies[i].getLatLng();
-                    if (can_see_player(aEnemies[i])){
-                        aEnemies[i].setIcon(oIconRed);
-                    }
-                    else {
-                        aEnemies[i].setIcon(oIconGreen);
-                    }
                     
                     if (oBounds.contains(oEnemyLatLng)){
+                        var iSpeed = 8;
+                        if (can_see_player(aEnemies[i])){
+                            aEnemies[i].setIcon(oIconEnemyRed);
+                            iSpeed = 13;
+                        }
+                        else {
+                            aEnemies[i].setIcon(oIconEnemyGreen );
+                            iSpeed = 3;
+                        }
+                        
                         // if distance is below 20 consider the player dead
                         var iOldDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
                         
@@ -447,15 +477,15 @@
                         iLosDiff = Math.abs(iAngle - aEnemies[i].last_angle);
                         if (iLosDiff > 1 && iOldDistance > 100){ // correct for interception
                             if (iAngle > aEnemies[i].last_angle) {
-                                iComputedAngle = iAngle + 20 * iLosDiff;
+                                iComputedAngle = iAngle + 5 * iLosDiff;
                             }
                             else {
-                                iComputedAngle = iAngle - 20 * iLosDiff;
+                                iComputedAngle = iAngle - 5 * iLosDiff;
                             }
                         }
                         aEnemies[i].last_angle = iAngle;
                         
-                        var oMoveCoords = getMoveLatLng(oEnemyLatLng.lat, oEnemyLatLng.lng, 8, iComputedAngle);
+                        var oMoveCoords = getMoveLatLng(oEnemyLatLng.lat, oEnemyLatLng.lng, iSpeed, iComputedAngle);
                         aEnemies[i].setLatLng(oMoveCoords);
                         
                         var iNewDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
@@ -486,11 +516,11 @@
                         var lon22 = parseFloat(oNode2.lon);
                         
                         if (line_intersects(lat11, lon11, lat12, lon12, lat21, lon21, lat22, lon22)){
-                            return true;
+                            return false;
                         }
                     }
                 }
-                return false;
+                return true;
             }
             
             $('#menu .scores').on('click', function(e){
