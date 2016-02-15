@@ -34,6 +34,8 @@
             });
             map.setView([42.1445, 24.74412], 17);
             
+            var aTestMarkers = [];
+            
             /*
             // Disable drag and zoom handlers.
             map.dragging.disable();
@@ -192,7 +194,12 @@
                         if (top_lng < parseFloat(oNewCoords.lng) && parseFloat(oNewCoords.lng) < bottom_lng){
 //                            console.log('possible found? ', tile_id)
 
-//                            L.marker([top_lat, top_lng]).addTo(map); // debug
+                            for (var i in aTestMarkers){
+                                map.removeLayer(aTestMarkers[i]);
+                            }
+                            var xx = L.marker([top_lat, top_lng]).addTo(map); // debug
+                            aTestMarkers.push(xx);
+                            
                             var x = map.project(oNewCoords, tile_zoom)
 //                            console.log('prkiect? ', x, tile_x, tile_y)
                             var offsetTile = $('#'+tile_id).offset();

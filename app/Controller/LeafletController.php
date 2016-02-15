@@ -5,7 +5,7 @@ App::uses('Controller', 'Controller');
 
 class LeafletController extends AppController {
     public $uses = array(
-        'City'
+        'City', 'Score'
     );
     
     public function uncover_tiles(){
@@ -17,7 +17,7 @@ class LeafletController extends AppController {
     }
     
     public function enemies(){
-        
+        $this->_getScores();
     }
     
     public function buildings() {
@@ -36,5 +36,12 @@ class LeafletController extends AppController {
         $this->layout = 'ajax';
         $this->set('data', $data);
         $this->render('/Site/Common/JsonResponse');
+    }
+    
+    public function _getScores(){
+        $tmp = $this->Score->find('all', array(
+            'order' => 'Score.created DESC'
+        ));
+        $this->set('scores', $tmp);
     }
 }
