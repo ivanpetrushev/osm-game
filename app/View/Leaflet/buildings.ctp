@@ -1,9 +1,10 @@
 <html>
     <head>
         <meta charset=utf-8 />
-        <title>Enemies</title>
+        <title>Buildings</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
+        <script src='/assets/js/Leaflet.MakiMarkers.js'></script>
         <script src='/assets/js/jquery-2.2.0.min.js'></script>
         <script src='/assets/js/functions.js'></script>
         
@@ -46,7 +47,18 @@
             var map = L.mapbox.map('ctMap', oTileJson, {
                 zoomControl: false
             });
-            //map.setView([42.1445, 24.74412], 17);
+            map.on('click', add_enemy)
+            
+            var oIconGreen = L.MakiMarkers.icon({
+                icon: "rocket",
+                color: "#0b0",
+                size: "m"
+            });
+            var oIconRed = L.MakiMarkers.icon({
+                icon: "rocket",
+                color: "#f00",
+                size: "m"
+            });
             
             // Disable drag and zoom handlers.
             map.dragging.disable();
@@ -72,6 +84,9 @@
             var aTargetLocations = [];
             var aEnemies = [];
             
+            var aBuildingWayElements = [];
+            var aBuildingNodeElements = [];
+            
             // init game
             $.ajax({
                 url: '/leaflet/get_random_city',
@@ -80,6 +95,10 @@
                     if (res.success){
                         var lat = parseFloat(res.data.lat);
                         var lng = parseFloat(res.data.lon);
+                        
+                        lat = 42.14154;
+                        lng = 24.74980;
+                        
                         map.setView([lat, lng], 17);
                         mPlayer.setLatLng([lat, lng]).addTo(map);
                         $('#infoPanel').html('Welcome to '+res.data.name+', population: '+res.data.population +'. Find nearest train station!').fadeIn();
@@ -88,38 +107,56 @@
                 }
             })
             
-            function fetch_targets(){
+            function fetch_buildings(){
                 var oStartLatLng = mPlayer.getLatLng();
                 var sQuery = '[out:json][timeout:25];'+
                             '('+
-                              'node["railway"="station"](around: 6000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
+                              'way["building"](around: 1000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
                             ');'+
-                            'out body;'
+                            'out body;'+
+                            '>;'+
+                            'out skel qt;'
                 $.ajax({
                     url: 'https://www.overpass-api.de/api/interpreter?data='+sQuery,
                     dataType: 'json',
                     crossDomain: true,
                     success: function(res){
-                        if (res.elements.length > 0){
-                            $('#infoPanel').append('<br /> '+res.elements.length+ ' targets around! <br /><div id="distance"></div><div id="enemies"></div>');
-                            for(var i in res.elements){
-                                var oTarget = res.elements[i];
-                                aTargetLocations.push(oTarget);
-                                var icon = L.icon({
-                                    iconUrl: '/img/icons/16x16/add_green.png'
-                                })
-                                L.marker([oTarget.lat, oTarget.lon], {icon: icon}).addTo(map);
-                                L.circle([oTarget.lat, oTarget.lon], 100).addTo(map);
+                        for (var i in res.elements){
+                            var el = res.elements[i];
+                            var id = el.id;
+                            if (el.type == 'way') aBuildingWayElements[id] = el;
+                            else if (el.type == 'node') aBuildingNodeElements[id] = el;
+                        }
+                        
+                        for (var i in aBuildingWayElements){
+                            var iWayId = aBuildingWayElements[i].id;
+                            var oFeature = {
+                                type: 'Feature',
+                                properties: {
+                                    
+                                },
+                                geometry: {
+                                    type: 'Polygon',
+                                    coordinates: [[]]
+                                }
                             }
                             
-                            fetch_enemies();
-                        }
-                        else {
-                            $('#infoPanel').append('<br /> No targets around! Automatically restarting...');
-                            setTimeout(function(){
-                                window.location.reload(true);
-                            }, 3000)
+                            for (var j in aBuildingWayElements[i].nodes){
+                                var iNodeId = aBuildingWayElements[i].nodes[j];
+                                if (typeof aBuildingNodeElements[iNodeId] != 'undefined'){
+                                    aBuildingWayElements[i].nodes[j] = aBuildingNodeElements[iNodeId];
+                                    var lat = parseFloat(aBuildingNodeElements[iNodeId].lat);
+                                    var lon = parseFloat(aBuildingNodeElements[iNodeId].lon);
+                                    oFeature.geometry.coordinates[0].push([lon, lat])
+                                }
+                            }
                             
+                            var style = {
+                                color: '#f00',
+                                weight: 1,
+                                opacity: 0.1
+                            }
+                            L.geoJson(oFeature, style).addTo(map);
                         }
                     }
                 })
@@ -139,41 +176,57 @@
                 mPlayer.setLatLng(oNewCoords);
                 map.panTo(oNewCoords);
                 
-                // move enemies using "Change in LOS rate" algorithm
-                var oBounds = map.getBounds();
+                // check all enemies visibilities
                 for (var i in aEnemies){
-                    var oEnemyLatLng = aEnemies[i].getLatLng();
-                    if (oBounds.contains(oEnemyLatLng)){
-                        // if distance is below 20 consider the player dead
-                        var iOldDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
-                        
-                        var iAngle = bearing(oEnemyLatLng.lat, oEnemyLatLng.lng, oNewCoords.lat, oNewCoords.lng);
-                        var iComputedAngle = iAngle;
-                        var iLosDiff = 0;
-                        if (typeof aEnemies[i].last_angle == 'undefined'){
-                            aEnemies[i].last_angle = iAngle;
-                        }
-                        
-                        iLosDiff = Math.abs(iAngle - aEnemies[i].last_angle);
-                        if (iLosDiff > 1 && iOldDistance > 100){ // correct for interception
-                            if (iAngle > aEnemies[i].last_angle) {
-                                iComputedAngle = iAngle + 20 * iLosDiff;
-                            }
-                            else {
-                                iComputedAngle = iAngle - 20 * iLosDiff;
-                            }
-                        }
-                        aEnemies[i].last_angle = iAngle;
-                        
-                        var oMoveCoords = getMoveLatLng(oEnemyLatLng.lat, oEnemyLatLng.lng, 8, iComputedAngle);
-                        aEnemies[i].setLatLng(oMoveCoords);
-                        
-                        var iNewDistance = mPlayer.getLatLng().distanceTo(aEnemies[i].getLatLng());
-                        if (iNewDistance < 20){
-                            alert('You die!');
-                        }
+                    if (can_see_player(aEnemies[i])){
+                        aEnemies[i].setIcon(oIconRed);
+                    }
+                    else {
+                        aEnemies[i].setIcon(oIconGreen);
                     }
                 }
+            }
+            
+            function add_enemy(e){
+                var oEnemy = L.marker(e.latlng, {icon: oIconGreen}).addTo(map);
+                aEnemies.push(oEnemy);
+                can_see_player(oEnemy);
+            }
+            
+            function can_see_player(oEnemy){
+                // ray 1: enemy - player
+                var lat11 = oEnemy.getLatLng().lat;
+                var lon11 = oEnemy.getLatLng().lng;
+                var lat12 = mPlayer.getLatLng().lat;
+                var lon12 = mPlayer.getLatLng().lng;
+                
+                // ray 2: each polygon's edge - if any of ray2 intersects ray1 - immediately return 
+//                console.log(aBuildingWayElements)
+                for (var i in aBuildingWayElements){
+                    var oThisBuilding = aBuildingWayElements[i];
+                    for (var j = 0; j < oThisBuilding.nodes.length - 1; j++){
+                        var oNode1 = oThisBuilding.nodes[j];
+                        var oNode2 = oThisBuilding.nodes[j+1];
+                        
+                        var lat21 = parseFloat(oNode1.lat);
+                        var lat22 = parseFloat(oNode2.lat);
+                        var lon21 = parseFloat(oNode1.lon);
+                        var lon22 = parseFloat(oNode2.lon);
+                        
+                        if (line_intersects(lat11, lon11, lat12, lon12, lat21, lon21, lat22, lon22)){
+//                            console.log('intersects?', j)
+//                            oEnemy.setIcon(oIconRed);
+                            return true;
+                        }
+                        else {
+//                            console.log('intersects not?', j)
+//                            oEnemy.setIcon(oIconGreen);
+                        }
+                    }
+//                    console.log('building', oThisBuilding)
+//                    return;// check only 1st building
+                }
+                return false;
             }
         </script>
     </body>
