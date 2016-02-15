@@ -20,6 +20,10 @@ class LeafletController extends AppController {
         $this->_getScores();
     }
     
+    public function pursuit(){
+        $this->_getScores();
+    }
+    
     public function buildings() {
         
     }

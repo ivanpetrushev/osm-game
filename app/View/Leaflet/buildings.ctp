@@ -201,7 +201,6 @@
                 var lon12 = mPlayer.getLatLng().lng;
                 
                 // ray 2: each polygon's edge - if any of ray2 intersects ray1 - immediately return 
-//                console.log(aBuildingWayElements)
                 for (var i in aBuildingWayElements){
                     var oThisBuilding = aBuildingWayElements[i];
                     for (var j = 0; j < oThisBuilding.nodes.length - 1; j++){
@@ -214,17 +213,9 @@
                         var lon22 = parseFloat(oNode2.lon);
                         
                         if (line_intersects(lat11, lon11, lat12, lon12, lat21, lon21, lat22, lon22)){
-//                            console.log('intersects?', j)
-//                            oEnemy.setIcon(oIconRed);
                             return true;
                         }
-                        else {
-//                            console.log('intersects not?', j)
-//                            oEnemy.setIcon(oIconGreen);
-                        }
                     }
-//                    console.log('building', oThisBuilding)
-//                    return;// check only 1st building
                 }
                 return false;
             }
