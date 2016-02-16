@@ -261,7 +261,7 @@
                 oInitParams.lat = parseFloat(aMatches[1]);
                 oInitParams.lon = parseFloat(aMatches[2]);
             }
-            console.log(oInitParams)
+            
             $.ajax({
                 url: '/leaflet/get_random_city',
                 dataType: 'json',
@@ -271,7 +271,7 @@
                         var lat = parseFloat(res.data.lat);
                         var lng = parseFloat(res.data.lon);
                         
-                        if (typeof oInitParams.lat){
+                        if (typeof oInitParams.lat != 'undefined'){
                             lat = oInitParams.lat;
                             lng = oInitParams.lon;
                         }
