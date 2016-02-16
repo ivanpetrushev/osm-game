@@ -109,6 +109,23 @@
                 padding: 5px;
             }
             
+            #ctHowto {
+                display: none;
+                position: absolute;
+                padding: 10px;
+                border: 1px solid black;
+                background-color: rgba(255, 255, 255, 0.8);
+                top: 20vh;
+                left: 0;
+                right: 0;
+                margin-left: auto;
+                margin-right: auto;
+                width: 500px;
+                max-height: 50vh;
+                /*overflow-y: scroll;*/
+                overflow-x: hidden;
+            }
+            
             #menu {
                 display: block;
                 position: absolute;
@@ -135,6 +152,7 @@
         <div id="splashscreen"><span class='loading' data-text='Loading world'>Loading world</span></div>
         <ul id="menu">
             <li class="scores">Scores</li>
+            <li class="howto">Howto</li>
         </ul>
         <div id='ctMap'></div>
         <div id='infoPanel'></div>
@@ -161,6 +179,9 @@
                 </tr>
                 <? endforeach; ?>
             </table>
+        </div>
+        <div id='ctHowto'>
+            Use arrow keys to move. Escape from enemies. Use buildings to get cover.
         </div>
         <script>
             L.mapbox.accessToken = 'pk.eyJ1IjoiaXZhbmF0b3JhIiwiYSI6ImNpazd1dmFpbjAwMDF3MW04MjFlMXJ6czMifQ.jeVzm6JIjhsdc5MRhUsd8w';
@@ -561,6 +582,9 @@
             
             $('#menu .scores').on('click', function(e){
                 $('#ctHighscores').slideToggle();
+            })
+            $('#menu .howto').on('click', function(e){
+                $('#ctHowto').slideToggle();
             })
         </script>
     </body>
