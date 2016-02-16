@@ -109,3 +109,62 @@ CakeLog::config('error', array(
 	'types' => array('warning', 'error', 'critical', 'alert', 'emergency'),
 	'file' => 'error',
 ));
+
+foreach(glob(APP."Config/my_config/*.php") as $configFile) {
+    include($configFile);
+}
+
+function lm($str, $var_dump = false, $bHavePost = true) {
+    $bHaveXdebug = (function_exists('xdebug_call_line'));
+    
+    $sShortDate = date('Y-m-d');
+    $sFilename = ROOT . "/app/tmp/logs/$sShortDate";
+    $date = date("d/m/Y H:i:s");
+    $sOut = "========================= $date ========================= \n";
+    if ($bHaveXdebug){
+        $sOut .= "LINE: " . xdebug_call_line() . "\n";
+        $sOut .= "FROM: " . xdebug_call_file(). "\n";
+        $sOut .= "FUNC: ". xdebug_call_function() . "\n";
+    }
+    if ($bHavePost){
+        $sOut .= "POST: " . print_r($_POST, true) . "\n";
+    }
+    $sOut .= "******************************************************** \n";
+    
+    if ($var_dump){
+        $sOut .= var_export($str, true);
+    }
+    else {
+        if (is_array($str)){
+            $sOut .= print_r($str, true);
+        }
+        elseif (is_object($str)){
+            $sOut .= print_r($str, true);
+        }
+        else {
+            $sOut .= ">> $str\n";
+        }
+    }
+    //$sOut = print_r(debug_backtrace(), true);
+    
+    if ($bHaveXdebug){
+        $aStack = xdebug_get_function_stack();
+        foreach ($aStack as $aItem){
+            if (isset($aItem['function'])){
+                $sOut .= $aItem['function'] ;
+            }
+            $sOut .= " " . $aItem['file'] . ":" . $aItem['line']."\n";
+        }
+    }
+    else {
+        $e = new Exception;
+        $sOut .= $e->getTraceAsString();
+    }
+    $sOut .= "=======================================================================\n";
+    $sOut .= "=======================================================================\n";
+    $sOut .= "=======================================================================\n\n\n";
+    $fp = @fopen($sFilename, "a");
+    @fwrite($fp, $sOut);
+    @fclose($fp);
+    @chmod($sFilename, 0666);
+}
