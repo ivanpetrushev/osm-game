@@ -10,8 +10,38 @@
         <script src='/assets/js/functions.js'></script>
         
         <link href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
+        <link href='https://fonts.googleapis.com/css?family=Russo+One' rel='stylesheet' type='text/css'>
         <style>
             body { margin:0; padding:0; }
+            #splashscreen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url(/assets/images/tile-texture-256.jpg);
+                z-index: 10;
+                font-size: 5em;
+                text-align: center;
+                font-family: 'Russo One', sans-serif;
+            }
+            #splashscreen .loading {
+                background: url(/assets/images/yellow_stripes2_400.jpg);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                position: relative;
+                top: 45%;
+            }
+            #splashscreen .loading:after {
+                background: none;
+                content: attr(data-text);
+                left: 0;
+                position: absolute;
+                text-shadow: 3px 3px 3px #000;
+                top: 0;
+                z-index: -1;
+              }
+
             #ctMap { position:absolute; top:0; bottom:0; width:100%; }
             #infoPanel {
                 position: absolute;
@@ -102,6 +132,7 @@
         </style>
     </head>
     <body>
+        <div id="splashscreen"><span class='loading' data-text='Loading world'>Loading world</span></div>
         <ul id="menu">
             <li class="scores">Scores</li>
         </ul>
@@ -143,6 +174,7 @@
                 minzoom: 0,
                 maxzoom: 18
             };
+            var oTileJson = 'mapbox.streets';
             
             var map = L.mapbox.map('ctMap', oTileJson, {
                 zoomControl: false
@@ -342,9 +374,10 @@
                             }
                             
                             var style = {
-                                color: '#f00',
+                                color: '#000',
                                 weight: 1,
-                                opacity: 0.1
+                                opacity: 0.1,
+                                fillOpacity: 0.6
                             }
                             L.geoJson(oFeature, style).addTo(map);
                         }
@@ -377,6 +410,9 @@
                         else {
                             $('#enemies').html('No enemies around!');
                         }
+                        
+                        // game is ready
+                        $('#splashscreen').animate({width:'toggle'},350);
                     }
                 })
             }
