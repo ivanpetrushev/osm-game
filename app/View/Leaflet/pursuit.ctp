@@ -49,6 +49,10 @@
         <script src='/assets/js/Leaflet.MakiMarkers.js'></script>
         <script src='/assets/js/jquery-2.2.0.min.js'></script>
         <script src='/assets/js/functions.js'></script>
-        <script src='/assets/js/pursuit.js'></script>
+        <script src='/assets/js/pursuit/enemy.js'></script>
+        <script src='/assets/js/pursuit/building.js'></script>
+        <script src='/assets/js/pursuit/player.js'></script>
+        <script src='/assets/js/pursuit/target.js'></script>
+        <script src='/assets/js/pursuit/main.js'></script>
     </body>
 </html>
