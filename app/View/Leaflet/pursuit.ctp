@@ -254,13 +254,27 @@
             var aBuildingNodeElements = [];
             
             // init game
+            // maybe we have preset coordinates in URL?
+            var oInitParams = {};
+            var aMatches = window.location.href.match(/pursuit\/(.+?)\/(.+?)$/);
+            if (aMatches){
+                oInitParams.lat = parseFloat(aMatches[1]);
+                oInitParams.lon = parseFloat(aMatches[2]);
+            }
+            console.log(oInitParams)
             $.ajax({
                 url: '/leaflet/get_random_city',
                 dataType: 'json',
+                data: oInitParams,
                 success: function(res){
                     if (res.success){
                         var lat = parseFloat(res.data.lat);
                         var lng = parseFloat(res.data.lon);
+                        
+                        if (oInitParams){
+                            lat = oInitParams.lat;
+                            lng = oInitParams.lon;
+                        }
                         map.setView([lat, lng], 17);
                         mPlayer.setLatLng([lat, lng]).addTo(map);
                         $('#infoPanel').html('Welcome to '+res.data.name+', population: '+res.data.population +'. Find nearest train station!').fadeIn();

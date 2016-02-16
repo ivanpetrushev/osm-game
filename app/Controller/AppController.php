@@ -31,4 +31,17 @@ App::uses('Controller', 'Controller');
  * @link		http://book.cakephp.org/2.0/en/controllers.html#the-app-controller
  */
 class AppController extends Controller {
+    
+    public function getQueryVal($sKey, $sDefault = null){
+        if (isset($this->params->query[$sKey]) && $this->params->query[$sKey] != ''){
+            return $this->params->query[$sKey];
+        }
+        if (isset($this->params->data[$sKey]) && $this->params->data[$sKey] != ''){
+            return $this->params->data[$sKey];
+        }
+        if (isset($this->params['named'][$sKey]) && $this->params['named'][$sKey] != ''){
+            return $this->params['named'][$sKey];
+        }
+        else return $sDefault;
+    }
 }

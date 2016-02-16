@@ -29,9 +29,35 @@ class LeafletController extends AppController {
     }
     
     public function get_random_city(){
-        $tmp = $this->City->find('first', array(
-            'order' => 'RAND()'
-        ));
+        $sLat = $this->getQueryVal('lat');
+        $sLon = $this->getQueryVal('lon');
+        
+        if ($sLat && $sLon){
+            $sLat = (float) $sLat;
+            $sLon = (float) $sLon;
+            $tmp = $this->City->query('SELECT
+                id, (
+                  6371 * acos (
+                    cos ( radians('.$sLat.') )
+                    * cos( radians( lat ) )
+                    * cos( radians( lon ) - radians('.$sLon.') )
+                    + sin ( radians('.$sLat.') )
+                    * sin( radians( lat ) )
+                  )
+                ) AS distance
+              FROM cities
+              ORDER BY distance LIMIT 1');
+            lm("GOT: " . print_r($tmp, true));
+            
+            if ($tmp){
+                $tmp = $this->City->findById($tmp[0]['cities']['id']);
+            }
+        }
+        else {
+            $tmp = $this->City->find('first', array(
+                'order' => 'RAND()'
+            ));
+        }
         
         $data = array(
             'success' => true,
