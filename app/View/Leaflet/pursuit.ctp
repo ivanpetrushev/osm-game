@@ -271,7 +271,7 @@
                         var lat = parseFloat(res.data.lat);
                         var lng = parseFloat(res.data.lon);
                         
-                        if (oInitParams){
+                        if (typeof oInitParams.lat){
                             lat = oInitParams.lat;
                             lng = oInitParams.lon;
                         }
