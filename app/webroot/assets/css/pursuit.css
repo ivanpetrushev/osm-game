@@ -95,6 +95,23 @@ body { margin:0; padding:0; }
     padding: 5px;
 }
 
+#ctHowto {
+    display: none;
+    position: absolute;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: rgba(255, 255, 255, 0.8);
+    top: 20vh;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+    max-height: 50vh;
+    /*overflow-y: scroll;*/
+    overflow-x: hidden;
+}
+
 #menu {
     display: block;
     position: absolute;
@@ -114,5 +131,6 @@ body { margin:0; padding:0; }
     margin-bottom: 4px;
 }
 #menu li:hover {
-    border-right: 2px solid green;
+    border-left: 2px solid blue;
+    color: blue;
 }
