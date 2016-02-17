@@ -19,15 +19,16 @@ Player.prototype.getLatLng = function(){
     return this.marker.getLatLng();
 }
 
-Player.prototype.move = function(dir){
+Player.prototype.move = function(dir, iAngle){
     if (! bGameRunning) return;
     // move marker
-    var iAngle = 0;
-    switch(dir){
-        case 'up': iAngle = 0; break;
-        case 'right': iAngle = 90; break;
-        case 'down': iAngle = 180; break;
-        case 'left': iAngle = 270; break;
+    if (typeof iAngle == 'undefined'){
+        switch(dir){
+            case 'up': iAngle = 0; break;
+            case 'right': iAngle = 90; break;
+            case 'down': iAngle = 180; break;
+            case 'left': iAngle = 270; break;
+        }
     }
     var oCurrentCoords = this.getLatLng();
     var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, this.speed, iAngle);

@@ -25,6 +25,13 @@ map.keyboard.disable();
 // Disable tap handler, if present.
 if (map.tap) map.tap.disable();
 
+map.on('click', function(e){
+    var oDstLatLng = e.latlng;
+    var oSrcLatLng = oPlayer.getLatLng();
+    var iAngle = bearing(oSrcLatLng.lat, oSrcLatLng.lng, oDstLatLng.lat, oDstLatLng.lng);
+    oPlayer.move('dummy', iAngle);
+})
+
 // add player and ability to move it
 var oPlayer = new Player();
 
