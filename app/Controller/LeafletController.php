@@ -24,6 +24,10 @@ class LeafletController extends AppController {
         $this->_getScores();
     }
     
+    public function warp(){
+        $this->_getScores();
+    }
+    
     public function buildings() {
         
     }
@@ -47,7 +51,6 @@ class LeafletController extends AppController {
                 ) AS distance
               FROM cities
               ORDER BY distance LIMIT 1');
-            lm("GOT: " . print_r($tmp, true));
             
             if ($tmp){
                 $tmp = $this->City->findById($tmp[0]['cities']['id']);
@@ -62,6 +65,38 @@ class LeafletController extends AppController {
         $data = array(
             'success' => true,
             'data' => $tmp['City'],
+        );
+        $this->layout = 'ajax';
+        $this->set('data', $data);
+        $this->render('/Site/Common/JsonResponse');
+    }
+    
+    public function get_cities_by_box(){
+        $sWest = $this->getQueryVal('west');
+        $sEast = $this->getQueryVal('east');
+        $sNorth = $this->getQueryVal('north');
+        $sSouth = $this->getQueryVal('south');
+        
+        $aConditions = array(
+            'City.lon >' => $sWest,
+            'City.lon <' => $sEast,
+            'City.lat <' => $sNorth,
+            'City.lat >' => $sSouth,
+        );
+        
+        $tmp = $this->City->find('all', array(
+            'conditions' => $aConditions
+        ));
+        lm('konds '.print_r($aConditions, true). ' tmp '.print_r($tmp, true));
+        $result = array();
+        foreach ($tmp as $item){
+            $result[] = $item['City'];
+        }
+        
+        
+        $data = array(
+            'success' => true,
+            'data' => $result
         );
         $this->layout = 'ajax';
         $this->set('data', $data);
