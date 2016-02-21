@@ -15,6 +15,12 @@ function Enemy(marker){
     this.map = marker._map;
     this.speed = 8;
     this.last_angle = null;
+    this.last_dst = null;
+    marker.enemy = this;
+    
+    marker.on('click', function(e){
+        console.log(this)
+    })
 }
 
 Enemy.prototype.isInBounds = function(){
@@ -53,19 +59,27 @@ Enemy.prototype.canSee = function(lat, lon){
     return true;
 }
 Enemy.prototype.moveTowardsPlayer = function(){
-    var oMyLatLon = this.marker.getLatLng();
-    var oTargetLatLng = oPlayer.getLatLng();
-    if (this.canSee(oTargetLatLng.lat, oTargetLatLng.lng)){
-        this.speed = 13;
+    var oSrcLatLon = this.marker.getLatLng();
+    var oDstLatLng = oPlayer.getLatLng();
+    if (this.canSee(oDstLatLng.lat, oDstLatLng.lng)){
+//        this.speed = 13;
         this.marker.setIcon(oIconEnemyRed);
+        this.last_dst = oDstLatLng;
     }
     else {
-        this.speed = 3;
+//        this.speed = 3;
         this.marker.setIcon(oIconEnemyGreen);
+        if (this.last_dst){ // move towards last known position
+            oDstLatLng = this.last_dst;
+        }
+        else {
+            return; //@TODO: generate random movement
+        }
     }
     
-    var iOldDistance = oTargetLatLng.distanceTo(oMyLatLon);
-    var iAngle = bearing(oMyLatLon.lat, oMyLatLon.lng, oTargetLatLng.lat, oTargetLatLng.lng);
+    
+    var iOldDistance = oDstLatLng.distanceTo(oSrcLatLon);
+    var iAngle = bearing(oSrcLatLon.lat, oSrcLatLon.lng, oDstLatLng.lat, oDstLatLng.lng);
     var iComputedAngle = iAngle;
     var iLosDiff = 0;
     if (! this.last_angle){
@@ -82,7 +96,7 @@ Enemy.prototype.moveTowardsPlayer = function(){
     }
     this.last_angle = iAngle;
     
-    var oMoveCoords = getMoveLatLng(oMyLatLon.lat, oMyLatLon.lng, this.speed, iComputedAngle);
+    var oMoveCoords = getMoveLatLng(oSrcLatLon.lat, oSrcLatLon.lng, this.speed, iComputedAngle);
     this.marker.setLatLng(oMoveCoords);
 
     var iNewDistance = window.oPlayer.getLatLng().distanceTo(oMoveCoords);
