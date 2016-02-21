@@ -1,4 +1,4 @@
-L.mapbox.accessToken = 'pk.eyJ1IjoiaXZhbmF0b3JhIiwiYSI6ImNpazd1dmFpbjAwMDF3MW04MjFlMXJ6czMifQ.jeVzm6JIjhsdc5MRhUsd8w';
+//L.mapbox.accessToken = 'pk.eyJ1IjoiaXZhbmF0b3JhIiwiYSI6ImNpazd1dmFpbjAwMDF3MW04MjFlMXJ6czMifQ.jeVzm6JIjhsdc5MRhUsd8w';
 
 var oTileJson = {
     tiles: [
@@ -7,17 +7,20 @@ var oTileJson = {
         'http://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
     ],
     minzoom: 0,
-    maxzoom: 18
+    maxzoom: 18,
+    zoomControl: false
 };
 var oTileJson = 'mapbox.streets';
 
-var map = L.mapbox.map('ctMap', oTileJson, {
+var map = L.map('ctMap', {
     zoomControl: false
 });
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(map);
 
-var mapNext = L.mapbox.map('ctMapNextLevel', oTileJson, {
+var mapNext = L.map('ctMapNextLevel', {
     zoomControl: false
 });
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(mapNext);
 mapNext.markers = [];
 
 // Disable drag and zoom handlers.
@@ -95,6 +98,7 @@ $.ajax({
 })
 
 function fetch_targets(){
+    $('.loading').html('Loading targets').attr('data-text', 'Loading targets');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
@@ -163,6 +167,7 @@ function fetch_targets(){
 }
 
 function fetch_buildings(){
+    $('.loading').html('Loading buildings').attr('data-text', 'Loading buildings');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
@@ -200,6 +205,7 @@ function fetch_buildings(){
 }
 
 function fetch_enemies(){
+    $('.loading').html('Loading enemies').attr('data-text', 'Loading enemies');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+

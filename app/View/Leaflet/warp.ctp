@@ -5,7 +5,7 @@
         <title>Warp</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         
-        <link rel='stylesheet' type="text/css" href='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css' />
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
         <link rel='stylesheet' type="text/css" href='https://fonts.googleapis.com/css?family=Russo+One' />
         <link rel='stylesheet' type="text/css" href="/assets/css/warp.css"  />
     </head>
@@ -46,7 +46,7 @@
             Use arrow keys to move. Escape from enemies. Use buildings to get cover.
         </div>
         
-        <script src='https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
         <script src='/assets/js/Leaflet.MakiMarkers.js'></script>
         <script src='/assets/js/jquery-2.2.0.min.js'></script>
         <script src='/assets/js/functions.js'></script>
