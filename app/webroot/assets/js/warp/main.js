@@ -61,7 +61,7 @@ var aBuildingNodeElements = [];
 // init game
 // maybe we have preset coordinates in URL?
 var oInitParams = {};
-var aMatches = window.location.href.match(/pursuit\/(.+?)\/(.+?)$/);
+var aMatches = window.location.href.match(/leaflet\/.+?\/(.+?)\/(.+?)$/);
 if (aMatches){
     oInitParams.lat = parseFloat(aMatches[1]);
     oInitParams.lon = parseFloat(aMatches[2]);
