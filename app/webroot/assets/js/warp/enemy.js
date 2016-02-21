@@ -34,17 +34,19 @@ Enemy.prototype.canSee = function(lat, lon){
     // ray 2: each polygon's edge - if any of ray2 intersects ray1 - immediately return 
     for (var i in window.aBuildings){
         var oThisBuilding = window.aBuildings[i];
-        for (var j = 0; j < oThisBuilding.nodes.length - 1; j++){
-            var oNode1 = oThisBuilding.nodes[j];
-            var oNode2 = oThisBuilding.nodes[j+1];
+        if (oThisBuilding.isInBounds()){
+            for (var j = 0; j < oThisBuilding.nodes.length - 1; j++){
+                var oNode1 = oThisBuilding.nodes[j];
+                var oNode2 = oThisBuilding.nodes[j+1];
 
-            var lat21 = parseFloat(oNode1.lat);
-            var lat22 = parseFloat(oNode2.lat);
-            var lon21 = parseFloat(oNode1.lon);
-            var lon22 = parseFloat(oNode2.lon);
+                var lat21 = parseFloat(oNode1.lat);
+                var lat22 = parseFloat(oNode2.lat);
+                var lon21 = parseFloat(oNode1.lon);
+                var lon22 = parseFloat(oNode2.lon);
 
-            if (line_intersects(lat11, lon11, lat12, lon12, lat21, lon21, lat22, lon22)){
-                return false;
+                if (line_intersects(lat11, lon11, lat12, lon12, lat21, lon21, lat22, lon22)){
+                    return false;
+                }
             }
         }
     }

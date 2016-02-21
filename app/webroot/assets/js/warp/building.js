@@ -5,6 +5,22 @@ function Building(cfg){
     this.id = cfg.id;
     this.nodes = cfg.nodes;
     this.feature = null;
+    this.centerLatLon = {};
+}
+
+Building.prototype.generateCenter = function(){
+    if (this.nodes.length > 0){
+        var iSumLat = 0;
+        var iSumLon = 0;
+        for (var i = 0; i < this.nodes.length; i++){
+            iSumLat += parseFloat(this.nodes[i].lat);
+            iSumLon += parseFloat(this.nodes[i].lon);
+        }
+        var iAvgLat = iSumLat / this.nodes.length;
+        var iAvgLon = iSumLon / this.nodes.length;
+        this.centerLatLon = L.latLng(iAvgLat, iAvgLon);
+//        L.marker(this.centerLatLon).addTo(map); // debug
+    }
 }
 
 Building.prototype.buildNodeList = function(){
@@ -13,6 +29,7 @@ Building.prototype.buildNodeList = function(){
             this.node_list.push([this.nodes[i].lon, this.nodes[i].lat])
             this.node_list_reversed.push([this.nodes[i].lat, this.nodes[i].lon])
         }
+        this.generateCenter();
     }
 }
 
@@ -42,4 +59,9 @@ Building.prototype.makeFeature = function(){
     }
     
     this.feature = L.geoJson(oFeature, oStyle).addTo(map);
+}
+
+Building.prototype.isInBounds = function(){
+    var oBounds = map.getBounds();
+    return oBounds.contains(this.centerLatLon);
 }
