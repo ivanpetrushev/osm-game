@@ -5,7 +5,7 @@ function Building(cfg){
     this.id = cfg.id;
     this.nodes = cfg.nodes;
     this.feature = null;
-    this.centerLatLon = {};
+    this.center_latlon = {};
 }
 
 Building.prototype.generateCenter = function(){
@@ -18,7 +18,7 @@ Building.prototype.generateCenter = function(){
         }
         var iAvgLat = iSumLat / this.nodes.length;
         var iAvgLon = iSumLon / this.nodes.length;
-        this.centerLatLon = L.latLng(iAvgLat, iAvgLon);
+        this.center_latlon = L.latLng(iAvgLat, iAvgLon);
 //        L.marker(this.centerLatLon).addTo(map); // debug
     }
 }
@@ -63,5 +63,5 @@ Building.prototype.makeFeature = function(){
 
 Building.prototype.isInBounds = function(){
     var oBounds = map.getBounds();
-    return oBounds.contains(this.centerLatLon);
+    return oBounds.contains(this.center_latlon);
 }
