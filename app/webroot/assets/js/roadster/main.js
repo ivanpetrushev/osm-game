@@ -61,6 +61,10 @@ var bGameRunning = true;
 var aBuildings = [];
 var aBuildingNodeElements = [];
 
+var aRoads = [];
+var aRoadNodeElements = [];
+var aRoadSegments = [];
+
 // init game
 // maybe we have preset coordinates in URL?
 var oInitParams = {};
@@ -90,7 +94,11 @@ $.ajax({
             $('#infoPanel').html('Welcome to '+res.data.name+', population: '+res.data.population +'. Find nearest train station!').fadeIn();
             $('input[name="city_name"]').val(res.data.name);
             //fetch_buildings();
-            fetch_targets();
+            
+            setTimeout(function(){
+                fetch_targets();
+            }, 500);
+            
 
             tsGameStart = new Date().getTime();
         }
@@ -153,7 +161,9 @@ function fetch_targets(){
             if (aTargetLocations.length > 0){
                 $('#infoPanel').append('<br /> '+aTargetLocations.length+ ' targets around! <br /><div id="distance"></div><div id="enemies"></div>');
 
-                fetch_buildings();
+                setTimeout(function(){
+                    fetch_buildings();
+                }, 500);
             }
             else {
                 $('#infoPanel').append('<br /> No targets around! Automatically restarting...');
@@ -199,7 +209,9 @@ function fetch_buildings(){
                 aBuildings[i].makeFeature();
             }
 
-            fetch_enemies();
+            setTimeout(function(){
+                fetch_enemies();
+            }, 500)
         }
     })
 }
@@ -228,6 +240,48 @@ function fetch_enemies(){
             else {
                 $('#enemies').html('No enemies around!');
             }
+
+            setTimeout(function(){
+                fetch_ways();
+            }, 500)
+        }
+    })
+}
+
+function fetch_ways(){
+    $('.loading').html('Loading ways').attr('data-text', 'Loading ways');
+    var oStartLatLng = oPlayer.marker.getLatLng();
+    var sQuery = '[out:json][timeout:25];'+
+                '('+
+                  'way["highway"](around: 1000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
+                ');'+
+                'out body;'+
+                '>;'+
+                'out skel qt;'
+    $.ajax({
+        url: 'https://www.overpass-api.de/api/interpreter?data='+sQuery,
+        dataType: 'json',
+        crossDomain: true,
+        success: function(res){
+            for (var i in res.elements){
+                var el = res.elements[i];
+                var id = el.id;
+                if (el.type == 'way') aRoads[id] = new Road(el);
+                else if (el.type == 'node') aRoadNodeElements[id] = el;
+            }
+
+            for (var i in aRoads){
+                for (var j in aRoads[i].nodes){
+                    var iNodeId = aRoads[i].nodes[j];
+                    if (typeof aRoadNodeElements[iNodeId] != 'undefined'){
+                        aRoads[i].nodes[j] = aRoadNodeElements[iNodeId];
+                    }
+                }
+
+                aRoads[i].makeFeature();
+            }
+            
+            console.log(aRoads.length + ' ways found!', res.elements);
 
             // game is ready
             $('#splashscreen').animate({width:'toggle'},350);

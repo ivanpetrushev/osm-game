@@ -13,7 +13,7 @@ function Enemy(marker){
     // extends https://www.mapbox.com/mapbox.js/api/v2.3.0/l-marker/
     this.marker = marker;
     this.map = marker._map;
-    this.speed = 8;
+    this.speed = 3;
     this.last_angle = null;
     this.last_dst = null;
     marker.enemy = this;

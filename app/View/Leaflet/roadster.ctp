@@ -50,8 +50,11 @@
         <script src='/assets/js/Leaflet.MakiMarkers.js'></script>
         <script src='/assets/js/jquery-2.2.0.min.js'></script>
         <script src='/assets/js/functions.js'></script>
+        
         <script src='/assets/js/roadster/enemy.js'></script>
         <script src='/assets/js/roadster/building.js'></script>
+        <script src='/assets/js/roadster/road.js'></script>
+        <script src='/assets/js/roadster/road_segment.js'></script>
         <script src='/assets/js/roadster/player.js'></script>
         <script src='/assets/js/roadster/target.js'></script>
         <script src='/assets/js/roadster/main.js'></script>

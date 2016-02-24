@@ -13,6 +13,7 @@ function Player(){
     this.marker = L.marker().setIcon(oIconPlayerMoving);
     this.speed = 10;
     this.cnt_moves = 0;
+    this.on_road = null;
 }
 
 Player.prototype.getLatLng = function(){
