@@ -14,6 +14,7 @@ function Player(){
     this.speed = 10;
     this.cnt_moves = 0;
     this.on_road = null;
+    this.on_segment = null; // [latLng, latLng]
 }
 
 Player.prototype.getLatLng = function(){

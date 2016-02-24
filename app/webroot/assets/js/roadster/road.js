@@ -37,12 +37,13 @@ Road.prototype.buildNodeList = function(){
 Road.prototype.makeFeature = function(){
     this.buildNodeList();
     
-    for (var i  = 0; i < this.node_list.length-1; i++){
-        var x = new RoadSegment(this.node_list[i], this.node_list[i+1])
-        x.makeFeature();
-    }
+//    for (var i  = 0; i < this.node_list.length-1; i++){
+//        var x = new RoadSegment(this.node_list[i], this.node_list[i+1])
+//        x.makeFeature();
+//    }
+
     
-    /*
+    //*
     var oFeature = {
         type: 'Feature',
         properties: {
@@ -57,7 +58,7 @@ Road.prototype.makeFeature = function(){
     
     var oStyle = {
         color: '#f00',
-        weight: 3,
+        weight: 5,
         opacity: 0.5,
     }
     
@@ -69,13 +70,19 @@ Road.prototype.makeFeature = function(){
             layer.on('click', function(e){
                 console.log(feature)
                 
-                oPlayer.setLatLng(feature.properties.center);
-                map.setView(feature.properties.center);
-                oPlayer.on_road = feature.properties.way_id;
+                var oNewCoords = feature.geometry.coordinates[0]; // feature.properties.center
+                oNewCoords = L.latLng(oNewCoords[1], oNewCoords[0])
+                var oSegmentEnd = feature.geometry.coordinates[1];
+                oSegmentEnd = L.latLng(oSegmentEnd[1], oSegmentEnd[0]);
+                
+                oPlayer.setLatLng(oNewCoords);
+                map.setView(oNewCoords);
+                oPlayer.on_road = aRoads[feature.properties.way_id];
+                oPlayer.on_segment = [oNewCoords, oSegmentEnd];
             })
         }
     }).addTo(map);
-    */
+    //*/
 }
 
 Road.prototype.isInBounds = function(){

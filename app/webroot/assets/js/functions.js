@@ -111,3 +111,26 @@ function is_in_polygon(point, vs) {
 
     return inside;
 };
+
+// find if point is inside sector - http://stackoverflow.com/questions/13652518/efficiently-find-points-inside-a-circle-sector
+
+function isInsideSector(point, center, sectorStart, sectorEnd, radiusSquared) {
+  var relPoint = {
+    x: point.x - center.x,
+    y: point.y - center.y
+  };
+
+  return !areClockwise(sectorStart, relPoint) &&
+         areClockwise(sectorEnd, relPoint) &&
+         isWithinRadius(relPoint, radiusSquared);
+}
+
+function areClockwise(v1, v2) {
+  return -v1.x*v2.y + v1.y*v2.x > 0;
+}
+
+function isWithinRadius(v, radiusSquared) {
+  return v.x*v.x + v.y*v.y <= radiusSquared;
+}
+
+//\find if point is inside sector
