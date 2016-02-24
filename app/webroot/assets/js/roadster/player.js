@@ -47,6 +47,36 @@ Player.prototype.move = function(dir, iAngle){
             this.marker.setIcon(oIconPlayerMoving);
         }
     }
+    
+    // get debug cone
+    var iConeAngle1 = iAngle - 45;
+    var iConeAngle2 = iAngle + 45;
+    var iConeDistance = 200; 
+    var oConeVector1 = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, iConeDistance, iConeAngle1);
+    oConeVector1.lon = oConeVector1.lng;
+    var oConeVector2 = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, iConeDistance, iConeAngle2);
+    oConeVector2.lon = oConeVector2.lng;
+    console.log(oConeVector1, oConeVector2)
+    // @TODO: clear old marked points
+    
+    for (var i in aRoadNodeElements){
+        if (typeof aRoadNodeElements[i] == 'function') continue;
+        
+        var center = {
+            lat: oCurrentCoords.lat,
+            lon: oCurrentCoords.lng
+        }
+        
+        var bInsideCone = isInsideSector(aRoadNodeElements[i], center, oConeVector1, oConeVector2, iConeDistance*iConeDistance);
+        if (bInsideCone){
+            console.log('inside cone', aRoadNodeElements[i])
+        }
+        else {
+            console.log('not', aRoadNodeElements[i])
+        }
+    }
+    
+    //\get debug cone
 
     this.marker.setLatLng(oNewCoords);
 
