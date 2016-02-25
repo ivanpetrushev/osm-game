@@ -81,12 +81,37 @@ Player.prototype.move = function(dir, iAngle){
     console.log('possibel segments (samo ot other roads)', aPossibleSegments)
     
     var aSegmentAngles = [];
+    var aSegmentAnglesDistances = [];
     for (var i = 0; i < aPossibleSegments.length; i++){
-        var iAngle = bearing(aPossibleSegments[i][0].lat, aPossibleSegments[i][0].lon,
-            aPossibleSegments[i][1].lat, aPossibleSegments[i][1].lon);
-        aSegmentAngles.push(iAngle)
+        var oNode1 = aPossibleSegments[i][0];
+        var oNode2 = aPossibleSegments[i][1];
+        var iDistanceTo1 = oCurrentCoords.distanceTo(L.latLng([oNode1.lat, oNode1.lon]));
+        var iDistanceTo2 = oCurrentCoords.distanceTo(L.latLng([oNode2.lat, oNode2.lon]));
+        var oFarNode = null;
+        if (iDistanceTo1 < iDistanceTo2) oFarNode = oNode2;
+        else oFarNode = oNode1;
+        
+        console.log('occ', oCurrentCoords, 'ofn', oFarNode)
+        
+        var iSegmentAngle = bearing(oCurrentCoords.lat, oCurrentCoords.lng, oFarNode.lat, oFarNode.lon);
+        aSegmentAngles.push(iSegmentAngle)
+        var iAngleDistance = iSegmentAngle - iAngle;
+        iAngleDistance = (iAngleDistance + 180) % 360 - 180;
+        aSegmentAnglesDistances.push(iAngleDistance)
     }
-    console.log('segment angles', aSegmentAngles)
+    console.log('segment angles', aSegmentAngles, 'distances', aSegmentAnglesDistances, 'desired angle', iAngle)
+    
+    // get closest angle
+    var iClosestAngle = 360;
+    var iClosestAngleKey = null;
+    for (var i = 0; i < aSegmentAnglesDistances.length; i++){
+        var iDistance = Math.abs(aSegmentAnglesDistances[i]);
+        if (iDistance < iClosestAngle){
+            iClosestAngle = iDistance;
+            iClosestAngleKey = i;
+        }
+    }
+    console.log('desired', iAngle, 'closest angle distance:', iClosestAngle, 'key:', iClosestAngleKey)
     
     // check angles of all segments and select the closest one to desired angle
     
