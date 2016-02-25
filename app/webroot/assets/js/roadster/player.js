@@ -13,8 +13,9 @@ function Player(){
     this.marker = L.marker().setIcon(oIconPlayerMoving);
     this.speed = 10;
     this.cnt_moves = 0;
-    this.on_road = null;
-    this.on_segment = null; // [latLng, latLng]
+    this.snapped_on_road = null;
+    this.snapped_on_node = null; 
+    this.currently_on_segment = null; // [latLng, latLng]
 }
 
 Player.prototype.getLatLng = function(){
@@ -48,34 +49,75 @@ Player.prototype.move = function(dir, iAngle){
         }
     }
     
-    // get debug cone
-    var iConeAngle1 = iAngle - 45;
-    var iConeAngle2 = iAngle + 45;
-    var iConeDistance = 200; 
-    var oConeVector1 = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, iConeDistance, iConeAngle1);
-    oConeVector1.lon = oConeVector1.lng;
-    var oConeVector2 = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, iConeDistance, iConeAngle2);
-    oConeVector2.lon = oConeVector2.lng;
-    console.log(oConeVector1, oConeVector2)
-    // @TODO: clear old marked points
-    
-    for (var i in aRoadNodeElements){
-        if (typeof aRoadNodeElements[i] == 'function') continue;
-        
-        var center = {
-            lat: oCurrentCoords.lat,
-            lon: oCurrentCoords.lng
-        }
-        
-        var bInsideCone = isInsideSector(aRoadNodeElements[i], center, oConeVector1, oConeVector2, iConeDistance*iConeDistance);
-        if (bInsideCone){
-            console.log('inside cone', aRoadNodeElements[i])
-        }
-        else {
-            console.log('not', aRoadNodeElements[i])
+    // player should be on any segment, maybe snapped to a node (if on a crossroad)
+    var aPossibleSegments = [];
+    if (this.snapped_on_node){
+        var iSnapNodeId = this.snapped_on_node.id;
+        var aWaysWithThisNode = aRoadNodeUsageMap[iSnapNodeId];
+        for (var i in aWaysWithThisNode){
+            if (typeof aWaysWithThisNode[i] == 'function') continue;
+            var aCheckWay = aRoads[aWaysWithThisNode[i]];
+//            console.log('check way', aCheckWay)
+            for (var j = 0; j < aCheckWay.nodes.length; j++){
+                if (typeof aCheckWay.nodes[j] == 'function') continue;
+                var aCheckNode = aCheckWay.nodes[j];
+                if (aCheckNode.id == iSnapNodeId){
+//                    console.log('found node id on way', aCheckWay)
+                    if (typeof aCheckWay.nodes[j-1] != 'undefined'){
+//                        console.log('adding prev segment')
+                        aPossibleSegments.push([aCheckWay.nodes[j-1], aCheckWay.nodes[j]])
+                    }
+                    if (typeof aCheckWay.nodes[j+1] != 'undefined'){
+//                        console.log('adding next segment')
+                        aPossibleSegments.push([aCheckWay.nodes[j], aCheckWay.nodes[j+1]])
+                    }
+                }
+            }
         }
     }
+    else {
+        // @TODO - player is in the middle of a segment
+    }
+    console.log('possibel segments (samo ot other roads)', aPossibleSegments)
     
+    var aSegmentAngles = [];
+    for (var i = 0; i < aPossibleSegments.length; i++){
+        var iAngle = bearing(aPossibleSegments[i][0].lat, aPossibleSegments[i][0].lon,
+            aPossibleSegments[i][1].lat, aPossibleSegments[i][1].lon);
+        aSegmentAngles.push(iAngle)
+    }
+    console.log('segment angles', aSegmentAngles)
+    
+    // check angles of all segments and select the closest one to desired angle
+    
+    // get debug cone
+//    var iConeAngle1 = iAngle - 45;
+//    var iConeAngle2 = iAngle + 45;
+//    var iConeDistance = 200; 
+//    var oConeVector1 = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, iConeDistance, iConeAngle1);
+//    oConeVector1.lon = oConeVector1.lng;
+//    var oConeVector2 = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, iConeDistance, iConeAngle2);
+//    oConeVector2.lon = oConeVector2.lng;
+//    console.log(oConeVector1, oConeVector2)
+//    // @TODO: clear old marked points
+//    
+//    for (var i in aRoadNodeElements){
+//        if (typeof aRoadNodeElements[i] == 'function') continue;
+//        
+//        var center = {
+//            lat: oCurrentCoords.lat,
+//            lon: oCurrentCoords.lng
+//        }
+//        
+//        var bInsideCone = isInsideSector(aRoadNodeElements[i], center, oConeVector1, oConeVector2, iConeDistance*iConeDistance);
+//        if (bInsideCone){
+//            console.log('inside cone', aRoadNodeElements[i])
+//        }
+//        else {
+//            console.log('not', aRoadNodeElements[i])
+//        }
+//    }
+//    
     //\get debug cone
 
     this.marker.setLatLng(oNewCoords);

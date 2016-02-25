@@ -72,13 +72,20 @@ Road.prototype.makeFeature = function(){
                 
                 var oNewCoords = feature.geometry.coordinates[0]; // feature.properties.center
                 oNewCoords = L.latLng(oNewCoords[1], oNewCoords[0])
-                var oSegmentEnd = feature.geometry.coordinates[1];
-                oSegmentEnd = L.latLng(oSegmentEnd[1], oSegmentEnd[0]);
+//                var oSegmentEnd = feature.geometry.coordinates[1];
+//                oSegmentEnd = L.latLng(oSegmentEnd[1], oSegmentEnd[0]);
+                
+                var iRoadId = feature.properties.way_id;
+                var oNode = aRoads[iRoadId].nodes[0];
+                var oNodeNext = aRoads[iRoadId].nodes[1];
+                var oNewCoords = L.latLng(oNode)
                 
                 oPlayer.setLatLng(oNewCoords);
                 map.setView(oNewCoords);
-                oPlayer.on_road = aRoads[feature.properties.way_id];
-                oPlayer.on_segment = [oNewCoords, oSegmentEnd];
+                oPlayer.snapped_on_road = aRoads[feature.properties.way_id];
+                oPlayer.snapped_on_node = oNode;
+                oPlayer.currently_on_segment = [oNode, oNodeNext];
+//                oPlayer.snapped_on_segment = [oNewCoords, oSegmentEnd];
             })
         }
     }).addTo(map);

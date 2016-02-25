@@ -64,6 +64,7 @@ var aBuildingNodeElements = [];
 var aRoads = [];
 var aRoadNodeElements = [];
 var aRoadSegments = [];
+var aRoadNodeUsageMap = {}; // obj[node_id] = [way_ids that use that node]
 
 // init game
 // maybe we have preset coordinates in URL?
@@ -276,6 +277,10 @@ function fetch_ways(){
                     if (typeof aRoadNodeElements[iNodeId] != 'undefined'){
                         aRoads[i].nodes[j] = aRoadNodeElements[iNodeId];
                     }
+                    if (typeof aRoadNodeUsageMap[iNodeId] == 'undefined'){
+                        aRoadNodeUsageMap[iNodeId] = [];
+                    }
+                    aRoadNodeUsageMap[iNodeId].push(aRoads[i].id);
                 }
 
                 aRoads[i].makeFeature();
