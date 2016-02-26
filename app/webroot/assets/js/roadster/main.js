@@ -1,5 +1,7 @@
 //L.mapbox.accessToken = 'pk.eyJ1IjoiaXZhbmF0b3JhIiwiYSI6ImNpazd1dmFpbjAwMDF3MW04MjFlMXJ6czMifQ.jeVzm6JIjhsdc5MRhUsd8w';
 
+var aSplashMessages = [];
+
 var oTileJson = {
     tiles: [
         'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -107,7 +109,7 @@ $.ajax({
 })
 
 function fetch_targets(){
-    $('.loading').html('Loading targets').attr('data-text', 'Loading targets');
+    push_splash_message('Loading targets');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
@@ -178,7 +180,7 @@ function fetch_targets(){
 }
 
 function fetch_buildings(){
-    $('.loading').html('Loading buildings').attr('data-text', 'Loading buildings');
+    push_splash_message('Loading buildings');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
@@ -218,7 +220,7 @@ function fetch_buildings(){
 }
 
 function fetch_enemies(){
-    $('.loading').html('Loading enemies').attr('data-text', 'Loading enemies');
+    push_splash_message('Loading enemies');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
@@ -250,7 +252,7 @@ function fetch_enemies(){
 }
 
 function fetch_ways(){
-    $('.loading').html('Loading ways').attr('data-text', 'Loading ways');
+    push_splash_message('Loading ways');
     var oStartLatLng = oPlayer.marker.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
@@ -355,6 +357,14 @@ function fetch_next_level(){
         })
     }, 2000)
     
+}
+
+function push_splash_message(str){
+    aSplashMessages.push(str);
+    $('.loading').each(function(e){
+        $(this).animate({top: parseFloat($(this).css('top')) - 20, fontSize: 40})
+    });
+    $("<div class='loading' data-text='"+str+"'>"+str+"</div>").appendTo($('#splashscreen'));
 }
 
 

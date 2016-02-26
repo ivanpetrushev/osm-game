@@ -8,7 +8,7 @@ body { margin:0; padding:0; }
     background: url(/assets/images/tile-texture-256.jpg);
     z-index: 10;
     font-size: 5em;
-    text-align: center;
+    /*text-align: center;*/
     font-family: 'Russo One', sans-serif;
 }
 #splashscreen .loading {
@@ -17,16 +17,24 @@ body { margin:0; padding:0; }
     -webkit-text-fill-color: transparent;
     position: relative;
     top: 45%;
+    width: 800px;
+    text-align: center;
+    margin: 0 auto;
 }
 #splashscreen .loading:after {
     background: none;
     content: attr(data-text);
     left: 0;
     position: absolute;
-    text-shadow: 3px 3px 3px #000;
+    text-shadow: 5px 5px 5px #000;
     top: 0;
     z-index: -1;
-  }
+    width: 800px;
+    text-align: center;
+}
+#splashscreen .loaded {
+    display: block;
+}
 
 #ctMap { position:absolute; top:0; bottom:0; width:100%; }
 #infoPanel {

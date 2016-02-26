@@ -10,7 +10,7 @@
         <link rel='stylesheet' type="text/css" href="/assets/css/roadster.css"  />
     </head>
     <body>
-        <div id="splashscreen"><span class='loading' data-text='Loading world'>Loading world</span></div>
+        <div id="splashscreen"><div class='loading' data-text='Loading world'>Loading world</div></div>
         <ul id="menu">
             <li class="scores">Scores</li>
             <li class="howto">Howto</li>
