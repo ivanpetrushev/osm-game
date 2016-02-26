@@ -11,8 +11,8 @@ var oIconPlayerBlocked = L.MakiMarkers.icon({
 
 function Player(){
     this.marker = L.marker().setIcon(oIconPlayerMoving);
-//    this.speed = 10;
-    this.speed = 300;
+    this.speed = 10;
+//    this.speed = 30;
     this.cnt_moves = 0;
     this.snapped_on_road = null;
     this.snapped_on_node = null; 
@@ -39,16 +39,18 @@ Player.prototype.move = function(dir, iAngle){
         }
     }
     var oCurrentCoords = this.getLatLng();
-    var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, this.speed, iAngle);
-    for (var i in aBuildings){
-        if (aBuildings[i].contains(oNewCoords.lat, oNewCoords.lng)){
-            this.marker.setIcon(oIconPlayerBlocked);
-            return;
-        }
-        else {
-            this.marker.setIcon(oIconPlayerMoving);
-        }
-    }
+    
+    
+    // we don't need that check for now
+//    for (var i in aBuildings){
+//        if (aBuildings[i].contains(oNewCoords.lat, oNewCoords.lng)){
+//            this.marker.setIcon(oIconPlayerBlocked);
+//            return;
+//        }
+//        else {
+//            this.marker.setIcon(oIconPlayerMoving);
+//        }
+//    }
     
     // player should be on any segment, maybe snapped to a node (if on a crossroad)
     var aPossibleSegments = [];
@@ -75,11 +77,20 @@ Player.prototype.move = function(dir, iAngle){
                 }
             }
         }
+        console.log('possibel segments (samo ot other roads)', aPossibleSegments)
     }
     else {
         // @TODO - player is in the middle of a segment
+        var oPlayerFakeNode = {
+            lat: oCurrentCoords.lat,
+            lon: oCurrentCoords.lng
+        };
+        console.log("THREE DOTS", oPlayerFakeNode, this.currently_on_segment[0], this.currently_on_segment[1])
+        aPossibleSegments.push([this.currently_on_segment[0], oPlayerFakeNode])
+        aPossibleSegments.push([oPlayerFakeNode, this.currently_on_segment[1]])
+        console.log('possible segments in the middle of', aPossibleSegments)
     }
-    console.log('possibel segments (samo ot other roads)', aPossibleSegments)
+    
     
     // check angles of all segments and select the closest one to desired angle
     
@@ -115,10 +126,10 @@ Player.prototype.move = function(dir, iAngle){
         }
     }
     console.log('desired', iAngle, 'closest angle distance:', iClosestAngle, 'key:', iClosestAngleKey)
-    if (iClosestAngle > 90){
-        // not close at all
-        return;
-    }
+//    if (iClosestAngle > 90){
+//        // not close at all
+//        return;
+//    }
     
     var iSelectedAngle = aSegmentAngles[iClosestAngleKey];
     var aSelectedSegment = aPossibleSegments[iClosestAngleKey];
@@ -135,12 +146,15 @@ Player.prototype.move = function(dir, iAngle){
     var iTowardsDistance = oCurrentCoords.distanceTo(L.latLng([oTowardsNode.lat, oTowardsNode.lon]));
     console.log('moving towards', oTowardsNode, 'distance to there', iTowardsDistance);
     if (iTowardsDistance < this.speed){
-        oNewCoords = L.latLng([oTowardsNode.lat, oTowardsNode.lon]);
+        var oNewCoords = L.latLng([oTowardsNode.lat, oTowardsNode.lon]);
         this.snapped_on_node = oTowardsNode;
     }
     else {
         // @TODO
+        this.snapped_on_node = null;
+        var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, this.speed, iSelectedAngle);
     }
+    this.currently_on_segment = aSelectedSegment;
     
 
     this.marker.setLatLng(oNewCoords);
