@@ -58,7 +58,7 @@ Road.prototype.makeFeature = function(){
     
     var oStyle = {
         color: '#f00',
-        weight: 5,
+        weight: 2,
         opacity: 0.5,
     }
     
@@ -67,6 +67,7 @@ Road.prototype.makeFeature = function(){
     this.feature = L.geoJson(oFeature, {
         style: oStyle,
         onEachFeature: function(feature, layer){ // totally only for debug
+            return;
             layer.on('click', function(e){
                 console.log(feature)
                 
