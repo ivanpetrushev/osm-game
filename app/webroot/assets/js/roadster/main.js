@@ -286,8 +286,8 @@ function fetch_ways(){
                 aRoads[i].makeFeature();
             }
             
-            console.log(aRoads.length + ' ways found!', res.elements);
-
+            oPlayer.snapToNearestRoad();
+            
             // game is ready
             $('#splashscreen').animate({width:'toggle'},350);
         }

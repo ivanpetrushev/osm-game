@@ -91,6 +91,11 @@ Player.prototype.move = function(dir, iAngle){
         console.log('possible segments in the middle of', aPossibleSegments)
     }
     
+    if (aPossibleSegments.length == 0){
+        // something wrong?
+        this.snapToNearestRoad();
+        return;
+    }
     
     // check angles of all segments and select the closest one to desired angle
     
@@ -204,4 +209,26 @@ Player.prototype.move = function(dir, iAngle){
             oEnemy.moveTowardsPlayer();
         }
     }
+}
+
+Player.prototype.snapToNearestRoad = function(){
+    var oCurrentLocation = this.getLatLng();
+    var aDistances = [];
+    for (var i in aRoadNodeElements){
+        aDistances[i] = oCurrentLocation.distanceTo(L.latLng(aRoadNodeElements[i].lat, aRoadNodeElements[i].lon));
+    }
+    var iMinDistance = 10000; // can't initialize it to aDistances[0] due to arrays being associative here
+    var iMinKey = 0;
+    for (var i in aDistances){
+        if (aDistances[i] < iMinDistance){
+            iMinDistance = aDistances[i];
+            iMinKey = i;
+        }
+    }
+    
+    var oNewCoords = L.latLng(aRoadNodeElements[iMinKey].lat, aRoadNodeElements[iMinKey].lon);
+    this.setLatLng(oNewCoords);
+    map.setView(oNewCoords);
+    
+    this.snapped_on_node = aRoadNodeElements[iMinKey];
 }
