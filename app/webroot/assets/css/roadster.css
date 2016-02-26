@@ -20,6 +20,7 @@ body { margin:0; padding:0; }
     width: 800px;
     text-align: center;
     margin: 0 auto;
+    -webkit-text-stroke: 2px black;
 }
 #splashscreen .loading:after {
     background: none;
