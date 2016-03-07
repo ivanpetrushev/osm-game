@@ -12,7 +12,7 @@
     <body>
         <div id="splashscreen"><div class='loading' data-text='Loading world'>Loading world</div></div>
         <ul id="menu">
-            <li class="scores">Scores</li>
+            <!--<li class="scores">Scores</li>-->
             <li class="howto">Howto</li>
         </ul>
         <div id='ctMap'></div>
