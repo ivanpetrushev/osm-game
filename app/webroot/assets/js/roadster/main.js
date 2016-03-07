@@ -17,12 +17,18 @@ var oTileJson = 'mapbox.streets';
 var map = L.map('ctMap', {
     zoomControl: false
 });
-L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(map);
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {
+    foo: 'bar',
+    attribution: '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors | <a target="_blank" href="http://www.openstreetmap.org/fixthemap">Improve this map</a>'
+}).addTo(map);
 
 var mapNext = L.map('ctMapNextLevel', {
     zoomControl: false
 });
-L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(mapNext);
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {
+    foo: 'bar',
+    attribution: '&copy; <a target="_blank" href="http://osm.org/copyright">OpenStreetMap</a> contributors | <a target="_blank" href="http://www.openstreetmap.org/fixthemap">Improve this map</a>'
+}).addTo(mapNext);
 mapNext.markers = [];
 
 // Disable drag and zoom handlers.
