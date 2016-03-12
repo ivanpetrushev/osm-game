@@ -42,8 +42,8 @@ map.keyboard.disable();
 if (map.tap) map.tap.disable();
 
 map.on('click', function(e){
-    var oDstLatLng = e.latlng;
     var oSrcLatLng = oPlayer.getLatLng();
+    var oDstLatLng = e.latlng;
     var iAngle = bearing(oSrcLatLng.lat, oSrcLatLng.lng, oDstLatLng.lat, oDstLatLng.lng);
     oPlayer.move('dummy', iAngle);
 })
@@ -241,7 +241,7 @@ function fetch_enemies(){
             if (res.elements.length > 0){
                 $('#enemies').html(res.elements.length + ' enemies found!');
                 for(var i in res.elements){
-                    var oEnemy = L.marker([res.elements[i].lat, res.elements[i].lon], {icon: oIconEnemyRed});
+                    var oEnemy = L.marker([res.elements[i].lat, res.elements[i].lon], {icon: oIconEnemyGreen});
                     oEnemy.addTo(map);
                     aEnemies.push(new Enemy(oEnemy));
                 }
@@ -295,6 +295,10 @@ function fetch_ways(){
             }
             
             oPlayer.snapToNearestRoad();
+            
+            for (var i in aEnemies){
+                aEnemies[i].snapToNearestRoad();
+            }
             
             // game is ready
             $('#splashscreen').animate({width:'toggle'},350);

@@ -10,12 +10,16 @@ var oIconEnemyRed = L.MakiMarkers.icon({
 });
 
 function Enemy(marker){
-    // extends https://www.mapbox.com/mapbox.js/api/v2.3.0/l-marker/
+    this.type = 'enemy';
+    // marker is https://www.mapbox.com/mapbox.js/api/v2.3.0/l-marker/
     this.marker = marker;
     this.map = marker._map;
-    this.speed = 3;
+    this.speed = 12;
     this.last_angle = null;
     this.last_dst = null;
+    this.snapped_on_road = null;
+    this.snapped_on_node = null; 
+    this.currently_on_segment = null; // [latLng, latLng]
     marker.enemy = this;
     
     marker.on('click', function(e){
@@ -23,17 +27,25 @@ function Enemy(marker){
     })
 }
 
+Enemy.prototype.getLatLng = function(){
+    return this.marker.getLatLng();
+}
+
+Enemy.prototype.setLatLng = function(latlng){
+    return this.marker.setLatLng(latlng);
+}
+
 Enemy.prototype.isInBounds = function(){
     var oBounds = this.map.getBounds();
-    return oBounds.contains(this.marker.getLatLng());
+    return oBounds.contains(this.getLatLng());
 }
 Enemy.prototype.canSee = function(lat, lon){
     if (typeof window.aBuildings == 'undefined'){
         throw 'No buildings defined';
     }
     // ray 1: enemy - player
-    var lat11 = this.marker.getLatLng().lat;
-    var lon11 = this.marker.getLatLng().lng;
+    var lat11 = this.getLatLng().lat;
+    var lon11 = this.getLatLng().lng;
     var lat12 = lat;
     var lon12 = lon;
 
@@ -58,16 +70,16 @@ Enemy.prototype.canSee = function(lat, lon){
     }
     return true;
 }
+
+// move enemies using "Change in LOS rate" algorithm
 Enemy.prototype.moveTowardsPlayer = function(){
-    var oSrcLatLon = this.marker.getLatLng();
+    var oSrcLatLon = this.getLatLng();
     var oDstLatLng = oPlayer.getLatLng();
     if (this.canSee(oDstLatLng.lat, oDstLatLng.lng)){
-//        this.speed = 13;
         this.marker.setIcon(oIconEnemyRed);
         this.last_dst = oDstLatLng;
     }
     else {
-//        this.speed = 3;
         this.marker.setIcon(oIconEnemyGreen);
         if (this.last_dst){ // move towards last known position
             oDstLatLng = this.last_dst;
@@ -77,30 +89,54 @@ Enemy.prototype.moveTowardsPlayer = function(){
         }
     }
     
-    
-    var iOldDistance = oDstLatLng.distanceTo(oSrcLatLon);
     var iAngle = bearing(oSrcLatLon.lat, oSrcLatLon.lng, oDstLatLng.lat, oDstLatLng.lng);
-    var iComputedAngle = iAngle;
-    var iLosDiff = 0;
-    if (! this.last_angle){
-        this.last_angle = iAngle;
-    }
-    iLosDiff = Math.abs(iAngle - this.last_angle);
-    if (iLosDiff > 1 && iOldDistance > 100){ // correct for interception
-        if (iAngle > this.last_angle) {
-            iComputedAngle = iAngle + 5 * iLosDiff;
-        }
-        else {
-            iComputedAngle = iAngle - 5 * iLosDiff;
-        }
-    }
-    this.last_angle = iAngle;
     
-    var oMoveCoords = getMoveLatLng(oSrcLatLon.lat, oSrcLatLon.lng, this.speed, iComputedAngle);
-    this.marker.setLatLng(oMoveCoords);
+//    var iOldDistance = oDstLatLng.distanceTo(oSrcLatLon);
+//    var iAngle = bearing(oSrcLatLon.lat, oSrcLatLon.lng, oDstLatLng.lat, oDstLatLng.lng);
+//    var iComputedAngle = iAngle;
+//    var iLosDiff = 0;
+//    if (! this.last_angle){
+//        this.last_angle = iAngle;
+//    }
+//    iLosDiff = Math.abs(iAngle - this.last_angle);
+//    if (iLosDiff > 1 && iOldDistance > 100){ // correct for interception
+//        if (iAngle > this.last_angle) {
+//            iComputedAngle = iAngle + 5 * iLosDiff;
+//        }
+//        else {
+//            iComputedAngle = iAngle - 5 * iLosDiff;
+//        }
+//    }
+//    this.last_angle = iAngle;
+    
+    //var oMoveCoords = getMoveLatLng(oSrcLatLon.lat, oSrcLatLon.lng, this.speed, iAngle);
+    var oMoveCoords = moveOnTheRoad(this, oSrcLatLon, iAngle);
+    this.setLatLng(oMoveCoords);
 
     var iNewDistance = window.oPlayer.getLatLng().distanceTo(oMoveCoords);
     if (iNewDistance < 20){
         alert('You die!');
     }
+}
+
+Enemy.prototype.snapToNearestRoad = function(){
+    var oCurrentLocation = this.getLatLng();
+    var aDistances = [];
+    for (var i in aRoadNodeElements){
+        aDistances[i] = oCurrentLocation.distanceTo(L.latLng(aRoadNodeElements[i].lat, aRoadNodeElements[i].lon));
+    }
+    var iMinDistance = 10000; // can't initialize it to aDistances[0] due to arrays being associative here
+    var iMinKey = 0;
+    for (var i in aDistances){
+        if (aDistances[i] < iMinDistance){
+            iMinDistance = aDistances[i];
+            iMinKey = i;
+        }
+    }
+    
+    var oNewCoords = L.latLng(aRoadNodeElements[iMinKey].lat, aRoadNodeElements[iMinKey].lon);
+    this.setLatLng(oNewCoords);
+//    map.setView(oNewCoords);
+    
+    this.snapped_on_node = aRoadNodeElements[iMinKey];
 }
