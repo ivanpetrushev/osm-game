@@ -1,3 +1,16 @@
 # osm-game
-just testing github
-more edits comming in #dev
+
+osm-game is a collection of generic games and code snippets using real-world maps and data. World data is derived from [OpenStreetMap]. 
+
+Currently in development:
+
+* [Roadster] - Escape from enemies. Find the nearest train station. Warp to the next city.
+
+### Dependencies
+* CakePHP
+* Leaflet
+* jQuery
+
+
+[OpenStreetMap]: <http://osm.org>
+[Roadster]: <http://osm-game.ivanatora.info/leaflet/roadster>
