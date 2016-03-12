@@ -29,7 +29,7 @@ Player.prototype.setLatLng = function(latlng){
 
 Player.prototype.move = function(dir, iAngle){
     if (! bGameRunning) return;
-    // move marker
+    
     if (typeof iAngle == 'undefined'){
         switch(dir){
             case 'up': iAngle = 0; break;
@@ -41,17 +41,6 @@ Player.prototype.move = function(dir, iAngle){
     var oCurrentCoords = this.getLatLng();
     
     
-    // we don't need that check for now
-//    for (var i in aBuildings){
-//        if (aBuildings[i].contains(oNewCoords.lat, oNewCoords.lng)){
-//            this.marker.setIcon(oIconPlayerBlocked);
-//            return;
-//        }
-//        else {
-//            this.marker.setIcon(oIconPlayerMoving);
-//        }
-//    }
-    
     // player should be on any segment, maybe snapped to a node (if on a crossroad)
     var aPossibleSegments = [];
     if (this.snapped_on_node){
@@ -60,35 +49,30 @@ Player.prototype.move = function(dir, iAngle){
         for (var i in aWaysWithThisNode){
             if (typeof aWaysWithThisNode[i] == 'function') continue;
             var aCheckWay = aRoads[aWaysWithThisNode[i]];
-//            console.log('check way', aCheckWay)
             for (var j = 0; j < aCheckWay.nodes.length; j++){
                 if (typeof aCheckWay.nodes[j] == 'function') continue;
                 var aCheckNode = aCheckWay.nodes[j];
                 if (aCheckNode.id == iSnapNodeId){
-//                    console.log('found node id on way', aCheckWay)
                     if (typeof aCheckWay.nodes[j-1] != 'undefined'){
-//                        console.log('adding prev segment')
                         aPossibleSegments.push([aCheckWay.nodes[j-1], aCheckWay.nodes[j]])
                     }
                     if (typeof aCheckWay.nodes[j+1] != 'undefined'){
-//                        console.log('adding next segment')
                         aPossibleSegments.push([aCheckWay.nodes[j], aCheckWay.nodes[j+1]])
                     }
                 }
             }
         }
-        console.log('possibel segments (samo ot other roads)', aPossibleSegments)
+//        console.log('possibel segments (samo ot other roads)', aPossibleSegments)
     }
     else {
-        // @TODO - player is in the middle of a segment
         var oPlayerFakeNode = {
             lat: oCurrentCoords.lat,
             lon: oCurrentCoords.lng
         };
-        console.log("THREE DOTS", oPlayerFakeNode, this.currently_on_segment[0], this.currently_on_segment[1])
+//        console.log("THREE DOTS", oPlayerFakeNode, this.currently_on_segment[0], this.currently_on_segment[1])
         aPossibleSegments.push([this.currently_on_segment[0], oPlayerFakeNode])
         aPossibleSegments.push([oPlayerFakeNode, this.currently_on_segment[1]])
-        console.log('possible segments in the middle of', aPossibleSegments)
+//        console.log('possible segments in the middle of', aPossibleSegments)
     }
     
     if (aPossibleSegments.length == 0){
@@ -110,15 +94,13 @@ Player.prototype.move = function(dir, iAngle){
         if (iDistanceTo1 < iDistanceTo2) oFarNode = oNode2;
         else oFarNode = oNode1;
         
-//        console.log('occ', oCurrentCoords, 'ofn', oFarNode)
-        
         var iSegmentAngle = bearing(oCurrentCoords.lat, oCurrentCoords.lng, oFarNode.lat, oFarNode.lon);
         aSegmentAngles.push(iSegmentAngle)
         var iAngleDistance = iSegmentAngle - iAngle;
         iAngleDistance = (iAngleDistance + 180) % 360 - 180;
         aSegmentAnglesDistances.push(iAngleDistance)
     }
-    console.log('segment angles', aSegmentAngles, 'distances', aSegmentAnglesDistances, 'desired angle', iAngle)
+//    console.log('segment angles', aSegmentAngles, 'distances', aSegmentAnglesDistances, 'desired angle', iAngle)
     
     // get closest angle
     var iClosestAngle = 360;
@@ -130,26 +112,22 @@ Player.prototype.move = function(dir, iAngle){
             iClosestAngleKey = i;
         }
     }
-    console.log('desired', iAngle, 'closest angle distance:', iClosestAngle, 'key:', iClosestAngleKey)
-//    if (iClosestAngle > 90){
-//        // not close at all
-//        return;
-//    }
+//    console.log('desired', iAngle, 'closest angle distance:', iClosestAngle, 'key:', iClosestAngleKey)
     
     var iSelectedAngle = aSegmentAngles[iClosestAngleKey];
     var aSelectedSegment = aPossibleSegments[iClosestAngleKey];
-    console.log('selected angle', iSelectedAngle, 'on segment', aSelectedSegment)
+//    console.log('selected angle', iSelectedAngle, 'on segment', aSelectedSegment)
     
     // we have a segment to work with, find which of the two endpoints is the target 
     
     var iAngleTo1 = bearing(oCurrentCoords.lat, oCurrentCoords.lng, aSelectedSegment[0].lat, aSelectedSegment[0].lon);
     var iAngleTo2 = bearing(oCurrentCoords.lat, oCurrentCoords.lng, aSelectedSegment[1].lat, aSelectedSegment[1].lon);
-    console.log('angle to 1', iAngleTo1, 'to 2', iAngleTo2)
+//    console.log('angle to 1', iAngleTo1, 'to 2', iAngleTo2)
     var oTowardsNode = null;
     if (iAngleTo1 == iSelectedAngle) oTowardsNode = aSelectedSegment[0];
     if (iAngleTo2 == iSelectedAngle) oTowardsNode = aSelectedSegment[1];
     var iTowardsDistance = oCurrentCoords.distanceTo(L.latLng([oTowardsNode.lat, oTowardsNode.lon]));
-    console.log('moving towards', oTowardsNode, 'distance to there', iTowardsDistance);
+//    console.log('moving towards', oTowardsNode, 'distance to there', iTowardsDistance);
     if (iTowardsDistance < this.speed){
         var oNewCoords = L.latLng([oTowardsNode.lat, oTowardsNode.lon]);
         this.snapped_on_node = oTowardsNode;
@@ -188,18 +166,6 @@ Player.prototype.move = function(dir, iAngle){
         // win
         fetch_next_level();
         return;
-        
-//        bGameRunning = false;
-//
-//        var tsGameEnd = new Date().getTime();
-//        var iGameDuration = Math.ceil((tsGameEnd - tsGameStart) / 1000 );
-//
-//        $('input[name="time"]').val(iGameDuration);
-//        $('#ctScoreboard .time').html(iGameDuration);
-//        $('input[name="cnt_enemies"]').val(aEnemies.length);
-//        $('input[name="cnt_moves"]').val(this.cnt_moves);
-//        $('#ctScoreboard').slideToggle();
-//        $('#ctScoreboard input[type=text]').focus();
     }
 
     // move enemies using "Change in LOS rate" algorithm
