@@ -11,6 +11,11 @@ Currently in development:
 * Leaflet
 * jQuery
 
+### Installation
+
+Clone the repository to your local directory.  
+Tweak <repo>/app/Config/database.php with corresponding details (@TODO: commit DB schema here)  
+Set Apache DocumentRoot to point to <repo>/app/webroot/  
 
 [OpenStreetMap]: <http://osm.org>
 [Roadster]: <http://osm-game.ivanatora.info/leaflet/roadster>
