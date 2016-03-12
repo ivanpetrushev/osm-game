@@ -76,12 +76,10 @@ Enemy.prototype.moveTowardsPlayer = function(){
     var oSrcLatLon = this.getLatLng();
     var oDstLatLng = oPlayer.getLatLng();
     if (this.canSee(oDstLatLng.lat, oDstLatLng.lng)){
-//        this.speed = 13;
         this.marker.setIcon(oIconEnemyRed);
         this.last_dst = oDstLatLng;
     }
     else {
-//        this.speed = 3;
         this.marker.setIcon(oIconEnemyGreen);
         if (this.last_dst){ // move towards last known position
             oDstLatLng = this.last_dst;

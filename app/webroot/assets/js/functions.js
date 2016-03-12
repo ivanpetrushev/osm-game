@@ -174,6 +174,8 @@ function moveOnTheRoad(entity, oCurrentCoords, iAngle){
     
     // check angles of all segments and select the closest one to desired angle
     
+//    if (entity.type == 'enemy') console.log('desired angle', iAngle);
+    
     var aSegmentAngles = [];
     var aSegmentAnglesDistances = [];
     for (var i = 0; i < aPossibleSegments.length; i++){
@@ -192,6 +194,7 @@ function moveOnTheRoad(entity, oCurrentCoords, iAngle){
         aSegmentAnglesDistances.push(iAngleDistance)
     }
     
+//    if (entity.type == 'enemy') console.log('possible angles', aSegmentAngles, 'with relative distances', aSegmentAnglesDistances);
     // get closest angle
     var iClosestAngle = 360;
     var iClosestAngleKey = null;
