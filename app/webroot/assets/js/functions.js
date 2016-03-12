@@ -134,3 +134,102 @@ function isWithinRadius(v, radiusSquared) {
 }
 
 //\find if point is inside sector
+
+function moveOnTheRoad(entity, oCurrentCoords, iAngle){
+    var aPossibleSegments = [];
+    if (entity.snapped_on_node){
+        var iSnapNodeId = entity.snapped_on_node.id;
+        var aWaysWithThisNode = aRoadNodeUsageMap[iSnapNodeId];
+        for (var i in aWaysWithThisNode){
+            if (typeof aWaysWithThisNode[i] == 'function') continue;
+            var aCheckWay = aRoads[aWaysWithThisNode[i]];
+            for (var j = 0; j < aCheckWay.nodes.length; j++){
+                if (typeof aCheckWay.nodes[j] == 'function') continue;
+                var aCheckNode = aCheckWay.nodes[j];
+                if (aCheckNode.id == iSnapNodeId){
+                    if (typeof aCheckWay.nodes[j-1] != 'undefined'){
+                        aPossibleSegments.push([aCheckWay.nodes[j-1], aCheckWay.nodes[j]])
+                    }
+                    if (typeof aCheckWay.nodes[j+1] != 'undefined'){
+                        aPossibleSegments.push([aCheckWay.nodes[j], aCheckWay.nodes[j+1]])
+                    }
+                }
+            }
+        }
+    }
+    else {
+        var oPlayerFakeNode = {
+            lat: oCurrentCoords.lat,
+            lon: oCurrentCoords.lng
+        };
+        aPossibleSegments.push([entity.currently_on_segment[0], oPlayerFakeNode])
+        aPossibleSegments.push([oPlayerFakeNode, entity.currently_on_segment[1]])
+    }
+    
+    if (aPossibleSegments.length == 0){
+        // something wrong?
+        entity.snapToNearestRoad();
+        return;
+    }
+    
+    // check angles of all segments and select the closest one to desired angle
+    
+    var aSegmentAngles = [];
+    var aSegmentAnglesDistances = [];
+    for (var i = 0; i < aPossibleSegments.length; i++){
+        var oNode1 = aPossibleSegments[i][0];
+        var oNode2 = aPossibleSegments[i][1];
+        var iDistanceTo1 = oCurrentCoords.distanceTo(L.latLng([oNode1.lat, oNode1.lon]));
+        var iDistanceTo2 = oCurrentCoords.distanceTo(L.latLng([oNode2.lat, oNode2.lon]));
+        var oFarNode = null;
+        if (iDistanceTo1 < iDistanceTo2) oFarNode = oNode2;
+        else oFarNode = oNode1;
+        
+        var iSegmentAngle = bearing(oCurrentCoords.lat, oCurrentCoords.lng, oFarNode.lat, oFarNode.lon);
+        aSegmentAngles.push(iSegmentAngle)
+        var iAngleDistance = iSegmentAngle - iAngle;
+        iAngleDistance = (iAngleDistance + 180) % 360 - 180;
+        aSegmentAnglesDistances.push(iAngleDistance)
+    }
+    
+    // get closest angle
+    var iClosestAngle = 360;
+    var iClosestAngleKey = null;
+    for (var i = 0; i < aSegmentAnglesDistances.length; i++){
+        var iAngleDistance = Math.abs(aSegmentAnglesDistances[i]);
+        if (iAngleDistance < iClosestAngle){
+            iClosestAngle = iAngleDistance;
+            iClosestAngleKey = i;
+        }
+    }
+    
+    var iSelectedAngle = aSegmentAngles[iClosestAngleKey];
+    if (entity.snapped_on_node){
+        var aSelectedSegment = aPossibleSegments[iClosestAngleKey];
+    }
+    else {
+        var aSelectedSegment = entity.currently_on_segment;
+    }
+    
+    // we have a segment to work with, find which of the two endpoints is the target 
+    
+    var iAngleTo1 = bearing(oCurrentCoords.lat, oCurrentCoords.lng, aSelectedSegment[0].lat, aSelectedSegment[0].lon);
+    var iAngleTo2 = bearing(oCurrentCoords.lat, oCurrentCoords.lng, aSelectedSegment[1].lat, aSelectedSegment[1].lon);
+    var oTowardsNode = null;
+    if (iAngleTo1 == iSelectedAngle) oTowardsNode = aSelectedSegment[0];
+    if (iAngleTo2 == iSelectedAngle) oTowardsNode = aSelectedSegment[1];
+    
+    var iTowardsDistance = oCurrentCoords.distanceTo(L.latLng([oTowardsNode.lat, oTowardsNode.lon]));
+    if (iTowardsDistance < entity.speed){
+        var oNewCoords = L.latLng([oTowardsNode.lat, oTowardsNode.lon]);
+        entity.snapped_on_node = oTowardsNode;
+    }
+    else {
+        // @TODO
+        entity.snapped_on_node = null;
+        var oNewCoords = getMoveLatLng(oCurrentCoords.lat, oCurrentCoords.lng, entity.speed, iSelectedAngle);
+    }
+    entity.currently_on_segment = aSelectedSegment;
+    
+    return oNewCoords;
+}
