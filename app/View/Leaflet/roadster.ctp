@@ -50,6 +50,7 @@
         <script src='/assets/js/Leaflet.MakiMarkers.js'></script>
         <script src='/assets/js/jquery-2.2.0.min.js'></script>
         <script src='/assets/js/functions.js'></script>
+        <script src='/assets/js/Dijkstras.js'></script>
         
         <script src='/assets/js/roadster/enemy.js'></script>
         <script src='/assets/js/roadster/building.js'></script>

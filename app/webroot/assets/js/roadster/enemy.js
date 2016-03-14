@@ -90,26 +90,6 @@ Enemy.prototype.moveTowardsPlayer = function(){
     }
     
     var iAngle = bearing(oSrcLatLon.lat, oSrcLatLon.lng, oDstLatLng.lat, oDstLatLng.lng);
-    
-//    var iOldDistance = oDstLatLng.distanceTo(oSrcLatLon);
-//    var iAngle = bearing(oSrcLatLon.lat, oSrcLatLon.lng, oDstLatLng.lat, oDstLatLng.lng);
-//    var iComputedAngle = iAngle;
-//    var iLosDiff = 0;
-//    if (! this.last_angle){
-//        this.last_angle = iAngle;
-//    }
-//    iLosDiff = Math.abs(iAngle - this.last_angle);
-//    if (iLosDiff > 1 && iOldDistance > 100){ // correct for interception
-//        if (iAngle > this.last_angle) {
-//            iComputedAngle = iAngle + 5 * iLosDiff;
-//        }
-//        else {
-//            iComputedAngle = iAngle - 5 * iLosDiff;
-//        }
-//    }
-//    this.last_angle = iAngle;
-    
-    //var oMoveCoords = getMoveLatLng(oSrcLatLon.lat, oSrcLatLon.lng, this.speed, iAngle);
     var oMoveCoords = moveOnTheRoad(this, oSrcLatLon, iAngle);
     this.setLatLng(oMoveCoords);
 
