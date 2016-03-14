@@ -9,8 +9,6 @@ function RoadSegment(a, b){
     };
     this.node_list = []; // list of [lat, lon]'s
     this.node_list_reversed = []; // list of [lon, lat]'s
-//    this._cfg = cfg;
-//    this.id = cfg.id;
     this.nodes = [this.a, this.b];
     this.feature = null;
     this.center_latlon = {};
@@ -40,7 +38,6 @@ RoadSegment.prototype.generateCenter = function(){
         var iAvgLat = iSumLat / this.nodes.length;
         var iAvgLon = iSumLon / this.nodes.length;
         this.center_latlon = L.latLng(iAvgLat, iAvgLon);
-//        L.marker(this.centerLatLon).addTo(map); // debug
     }
 }
 
@@ -65,17 +62,14 @@ RoadSegment.prototype.makeFeature = function(){
         opacity: 0.5,
     }
     
-//    console.log(JSON.stringify(oFeature))
-
     this.feature = L.geoJson(oFeature, {
         style: oStyle,
         onEachFeature: function(feature, layer){ // totally only for debug
             layer.on('click', function(e){
-                console.log(feature)
+                console.log('debug road segment feature', feature)
                 
                 oPlayer.setLatLng(feature.properties.center);
                 map.setView(feature.properties.center);
-//                oPlayer.on_road = feature.properties.way_id;
             })
         }
     }).addTo(map);

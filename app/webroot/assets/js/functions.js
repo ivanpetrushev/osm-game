@@ -113,7 +113,6 @@ function is_in_polygon(point, vs) {
 };
 
 // find if point is inside sector - http://stackoverflow.com/questions/13652518/efficiently-find-points-inside-a-circle-sector
-
 function isInsideSector(point, center, sectorStart, sectorEnd, radiusSquared) {
     var relPoint = {
         lat: point.lat - center.lat,
@@ -132,7 +131,6 @@ function areClockwise(v1, v2) {
 function isWithinRadius(v, radiusSquared) {
     return v.lat * v.lat + v.lon * v.lon <= radiusSquared;
 }
-
 //\find if point is inside sector
 
 function moveOnTheRoad(entity, oCurrentCoords, iAngle){
@@ -235,4 +233,74 @@ function moveOnTheRoad(entity, oCurrentCoords, iAngle){
     entity.currently_on_segment = aSelectedSegment;
     
     return oNewCoords;
+}
+
+function getRawNodeGraph(){
+    if (! oRawNodeGraph){
+//    if (true){
+        oRawNodeGraph = {};
+        var oBounds = map.getBounds();
+        for (var iNodeId in aRoadNodeUsageMap){
+            var node = aRoadNodeElements[iNodeId];
+            var latlng = L.latLng({lat: node.lat, lon: node.lon});
+            if (oBounds.contains(latlng)){
+                if (typeof oRawNodeGraph[iNodeId] == 'undefined'){
+                    oRawNodeGraph[iNodeId] = [];
+                }
+                var aWaysWithThisNode = aRoadNodeUsageMap[iNodeId];
+                for (var i in aWaysWithThisNode){
+                    if (typeof aWaysWithThisNode[i] == 'function') continue;
+                    var aCheckWay = aRoads[aWaysWithThisNode[i]];
+                    for (var j = 0; j < aCheckWay.nodes.length; j++){
+                        if (typeof aCheckWay.nodes[j] == 'function') continue;
+                        var aCheckNode = aCheckWay.nodes[j];
+                        if (aCheckNode.id == iNodeId){
+                            if (typeof aCheckWay.nodes[j-1] != 'undefined'){
+                                var oLatlngPrev = L.latLng(aCheckWay.nodes[j-1].lat, aCheckWay.nodes[j-1].lon)
+                                var iDistance = latlng.distanceTo(oLatlngPrev);
+                                oRawNodeGraph[iNodeId].push({id: aCheckWay.nodes[j-1].id, dist: iDistance});
+                            }
+                            if (typeof aCheckWay.nodes[j+1] != 'undefined'){
+                                var oLatlngNext = L.latLng(aCheckWay.nodes[j+1].lat, aCheckWay.nodes[j+1].lon)
+                                var iDistance = latlng.distanceTo(oLatlngNext);
+                                oRawNodeGraph[iNodeId].push({id: aCheckWay.nodes[j+1].id, dist: iDistance});
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    return JSON.parse(JSON.stringify((oRawNodeGraph))); // need to save oRawNodeGraph as a default base
+}
+
+function invalidateNodeGraph(){
+    oNodeGraph = null;
+}
+
+function getDijkstraGraph(graph){
+    var oOutGraph = [];
+    for (var iNodeId in graph){
+        for (var i in graph[iNodeId]){
+            var nodes = graph[iNodeId];
+            var aConnections = [];
+            for (var j in nodes){
+//                console.log('node is', node)
+                aConnections.push([nodes[j].id, nodes[j].dist])
+            }
+        }
+        oOutGraph.push([iNodeId, aConnections])
+    }
+    return oOutGraph;
+}
+
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
 }

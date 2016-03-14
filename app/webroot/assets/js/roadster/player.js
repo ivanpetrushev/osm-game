@@ -50,6 +50,7 @@ Player.prototype.move = function(dir, iAngle){
 
     if (this.cnt_moves % 10 == 0){
         map.panTo(oNewCoords);
+        invalidateNodeGraph();
     }
 
     // calculate distance and anounce nearest
