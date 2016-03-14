@@ -237,14 +237,15 @@ function moveOnTheRoad(entity, oCurrentCoords, iAngle){
 
 function getRawNodeGraph(){
     if (! oRawNodeGraph){
-        var oGraphRaw = {};
+//    if (true){
+        oRawNodeGraph = {};
         var oBounds = map.getBounds();
         for (var iNodeId in aRoadNodeUsageMap){
             var node = aRoadNodeElements[iNodeId];
             var latlng = L.latLng({lat: node.lat, lon: node.lon});
             if (oBounds.contains(latlng)){
-                if (typeof oGraphRaw[iNodeId] == 'undefined'){
-                    oGraphRaw[iNodeId] = [];
+                if (typeof oRawNodeGraph[iNodeId] == 'undefined'){
+                    oRawNodeGraph[iNodeId] = [];
                 }
                 var aWaysWithThisNode = aRoadNodeUsageMap[iNodeId];
                 for (var i in aWaysWithThisNode){
@@ -257,12 +258,12 @@ function getRawNodeGraph(){
                             if (typeof aCheckWay.nodes[j-1] != 'undefined'){
                                 var oLatlngPrev = L.latLng(aCheckWay.nodes[j-1].lat, aCheckWay.nodes[j-1].lon)
                                 var iDistance = latlng.distanceTo(oLatlngPrev);
-                                oGraphRaw[iNodeId].push({id: aCheckWay.nodes[j-1].id, dist: iDistance});
+                                oRawNodeGraph[iNodeId].push({id: aCheckWay.nodes[j-1].id, dist: iDistance});
                             }
                             if (typeof aCheckWay.nodes[j+1] != 'undefined'){
                                 var oLatlngNext = L.latLng(aCheckWay.nodes[j+1].lat, aCheckWay.nodes[j+1].lon)
                                 var iDistance = latlng.distanceTo(oLatlngNext);
-                                oGraphRaw[iNodeId].push({id: aCheckWay.nodes[j+1].id, dist: iDistance});
+                                oRawNodeGraph[iNodeId].push({id: aCheckWay.nodes[j+1].id, dist: iDistance});
                             }
                         }
                     }
@@ -270,10 +271,9 @@ function getRawNodeGraph(){
             }
         }
         
-        oRawNodeGraph = oGraphRaw;
     }
     
-    return oRawNodeGraph;
+    return JSON.parse(JSON.stringify((oRawNodeGraph))); // need to save oRawNodeGraph as a default base
 }
 
 function invalidateNodeGraph(){
@@ -294,4 +294,13 @@ function getDijkstraGraph(graph){
         oOutGraph.push([iNodeId, aConnections])
     }
     return oOutGraph;
+}
+
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
 }

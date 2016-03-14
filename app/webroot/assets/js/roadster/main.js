@@ -183,7 +183,7 @@ function fetch_targets(){
 
 function fetch_buildings(){
     push_splash_message('Loading buildings');
-    var oStartLatLng = oPlayer.marker.getLatLng();
+    var oStartLatLng = oPlayer.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
                   'way["building"](around: 1000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
@@ -223,7 +223,7 @@ function fetch_buildings(){
 
 function fetch_enemies(){
     push_splash_message('Loading enemies');
-    var oStartLatLng = oPlayer.marker.getLatLng();
+    var oStartLatLng = oPlayer.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
                   'node["shop"](around: 2000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
@@ -255,7 +255,7 @@ function fetch_enemies(){
 
 function fetch_ways(){
     push_splash_message('Loading ways');
-    var oStartLatLng = oPlayer.marker.getLatLng();
+    var oStartLatLng = oPlayer.getLatLng();
     var sQuery = '[out:json][timeout:25];'+
                 '('+
                   'way["highway"](around: 1000, '+oStartLatLng.lat+', '+oStartLatLng.lng+' ); '+
