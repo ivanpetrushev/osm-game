@@ -73,7 +73,7 @@ Enemy.prototype.canSee = function(lat, lon){
 
 // move enemies using "Change in LOS rate" algorithm
 Enemy.prototype.moveTowardsPlayer = function(){
-    var oSrcLatLon = this.getLatLng();
+    var oSrcLatLng = this.getLatLng();
     var oDstLatLng = oPlayer.getLatLng();
     if (this.canSee(oDstLatLng.lat, oDstLatLng.lng)){
         this.marker.setIcon(oIconEnemyRed);
@@ -89,11 +89,114 @@ Enemy.prototype.moveTowardsPlayer = function(){
         }
     }
     
-    var iAngle = bearing(oSrcLatLon.lat, oSrcLatLon.lng, oDstLatLng.lat, oDstLatLng.lng);
-    var oMoveCoords = moveOnTheRoad(this, oSrcLatLon, iAngle);
+    // do some routing, first get all ways in sight
+    console.log('----------------------------------------')
+    oGraphRaw = getRawNodeGraph();
+    // add enemy to the graph
+    oGraphRaw[0] = []; // use 0 for enemy index
+    if (this.snapped_on_node){
+        var iNodeId = this.snapped_on_node.id;
+        var latlng = L.latLng({lat: this.snapped_on_node.lat, lon: this.snapped_on_node.lon});
+    
+        var aWaysWithThisNode = aRoadNodeUsageMap[iNodeId];
+        for (var i in aWaysWithThisNode){
+            if (typeof aWaysWithThisNode[i] == 'function') continue;
+            var aCheckWay = aRoads[aWaysWithThisNode[i]];
+            for (var j = 0; j < aCheckWay.nodes.length; j++){
+                if (typeof aCheckWay.nodes[j] == 'function') continue;
+                var aCheckNode = aCheckWay.nodes[j];
+                if (aCheckNode.id == iNodeId){
+                    if (typeof aCheckWay.nodes[j-1] != 'undefined'){
+                        var oLatlngPrev = L.latLng(aCheckWay.nodes[j-1].lat, aCheckWay.nodes[j-1].lon)
+                        var iDistance = latlng.distanceTo(oLatlngPrev);
+                        oGraphRaw[0].push({id: aCheckWay.nodes[j-1].id, dist: iDistance});
+                    }
+                    if (typeof aCheckWay.nodes[j+1] != 'undefined'){
+                        var oLatlngNext = L.latLng(aCheckWay.nodes[j+1].lat, aCheckWay.nodes[j+1].lon)
+                        var iDistance = latlng.distanceTo(oLatlngNext);
+                        oGraphRaw[0].push({id: aCheckWay.nodes[j+1].id, dist: iDistance});
+                    }
+                }
+            }
+        }
+    }
+    else {
+        var iDistance1 = oSrcLatLng.distanceTo(this.currently_on_segment[0]);
+        var iDistance2 = oSrcLatLng.distanceTo(this.currently_on_segment[1]);
+        oGraphRaw[0] = [ // use 2 for this enemy index
+            {id: this.currently_on_segment[0].id, dist: iDistance1},
+            {id: this.currently_on_segment[1].id, dist: iDistance2},
+        ]
+    }
+    for (var i in oGraphRaw[0]){
+        var aConnection = oGraphRaw[0][i];
+        console.log('0 connections', aConnection)
+        var iConnectedId = aConnection.id;
+        console.log('0 connected id', iConnectedId)
+        if (typeof oGraphRaw[iConnectedId] != 'undefined'){
+            oGraphRaw[iConnectedId].push({id: 0, dist: aConnection.dist})
+        }
+    }
+    
+    // add player to the graph
+    oGraphRaw[1] = []; // use 1 for player index
+    if (oPlayer.snapped_on_node){
+        var iNodeId = oPlayer.snapped_on_node.id;
+        var latlng = L.latLng({lat: oPlayer.snapped_on_node.lat, lon: oPlayer.snapped_on_node.lon});
+    
+        var aWaysWithThisNode = aRoadNodeUsageMap[iNodeId];
+        for (var i in aWaysWithThisNode){
+            if (typeof aWaysWithThisNode[i] == 'function') continue;
+            var aCheckWay = aRoads[aWaysWithThisNode[i]];
+            for (var j = 0; j < aCheckWay.nodes.length; j++){
+                if (typeof aCheckWay.nodes[j] == 'function') continue;
+                var aCheckNode = aCheckWay.nodes[j];
+                if (aCheckNode.id == iNodeId){
+                    if (typeof aCheckWay.nodes[j-1] != 'undefined'){
+                        var oLatlngPrev = L.latLng(aCheckWay.nodes[j-1].lat, aCheckWay.nodes[j-1].lon)
+                        var iDistance = latlng.distanceTo(oLatlngPrev);
+                        oGraphRaw[1].push({id: aCheckWay.nodes[j-1].id, dist: iDistance});
+                    }
+                    if (typeof aCheckWay.nodes[j+1] != 'undefined'){
+                        var oLatlngNext = L.latLng(aCheckWay.nodes[j+1].lat, aCheckWay.nodes[j+1].lon)
+                        var iDistance = latlng.distanceTo(oLatlngNext);
+                        oGraphRaw[1].push({id: aCheckWay.nodes[j+1].id, dist: iDistance});
+                    }
+                }
+            }
+        }
+    }
+    else {
+        var iDistance1 = oDstLatLng.distanceTo(oPlayer.currently_on_segment[0]);
+        var iDistance2 = oDstLatLng.distanceTo(oPlayer.currently_on_segment[1]);
+        oGraphRaw[1] = [ 
+            {id: oPlayer.currently_on_segment[0].id, dist: iDistance1},
+            {id: oPlayer.currently_on_segment[1].id, dist: iDistance2},
+        ]
+    }
+    for (var i in oGraphRaw[1]){
+        var aConnection = oGraphRaw[1][i];
+        console.log('1 connections', aConnection)
+        var iConnectedId = aConnection.id;
+        console.log('1 connected id', iConnectedId)
+        if (typeof oGraphRaw[iConnectedId] != 'undefined'){
+            oGraphRaw[iConnectedId].push({id: 1, dist: aConnection.dist})
+        }
+    }
+    
+//    console.log('graph', oGraphRaw)
+    var oDijkstraGraph = getDijkstraGraph(oGraphRaw);
+//    console.log('dikjstra ready', oDijkstraGraph)
+    var d = new Dijkstras();
+    d.setGraph(oDijkstraGraph);
+    var path = d.getPath(0, 1);
+    console.log('path', path)
+    
+    var iAngle = bearing(oSrcLatLng.lat, oSrcLatLng.lng, oDstLatLng.lat, oDstLatLng.lng);
+    var oMoveCoords = moveOnTheRoad(this, oSrcLatLng, iAngle);
     this.setLatLng(oMoveCoords);
 
-    var iNewDistance = window.oPlayer.getLatLng().distanceTo(oMoveCoords);
+    var iNewDistance = oPlayer.getLatLng().distanceTo(oMoveCoords);
     if (iNewDistance < 20){
         alert('You die!');
     }

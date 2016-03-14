@@ -68,6 +68,8 @@ var aRoadNodeElements = [];
 var aRoadSegments = [];
 var aRoadNodeUsageMap = {}; // obj[node_id] = [way_ids that use that node]
 
+var oRawNodeGraph = null;
+
 // init game
 // maybe we have preset coordinates in URL?
 var oInitParams = {};
@@ -288,8 +290,8 @@ function fetch_ways(){
                 aRoads[i].makeFeature();
             }
             
+            // now we have roads and can snap some entities to them
             oPlayer.snapToNearestRoad();
-            
             for (var i in aEnemies){
                 aEnemies[i].snapToNearestRoad();
             }
