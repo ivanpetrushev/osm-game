@@ -36,6 +36,10 @@ class LeafletController extends AppController {
         
     }
     
+    public function dijkstra() {
+        
+    }
+    
     public function get_random_city(){
         $sLat = $this->getQueryVal('lat');
         $sLon = $this->getQueryVal('lon');
