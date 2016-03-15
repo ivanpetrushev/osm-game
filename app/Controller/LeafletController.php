@@ -54,6 +54,7 @@ class LeafletController extends AppController {
                   )
                 ) AS distance
               FROM cities
+              WHERE is_active = 1
               ORDER BY distance LIMIT 1');
             
             if ($tmp){
@@ -69,6 +70,18 @@ class LeafletController extends AppController {
         $data = array(
             'success' => true,
             'data' => $tmp['City'],
+        );
+        $this->layout = 'ajax';
+        $this->set('data', $data);
+        $this->render('/Site/Common/JsonResponse');
+    }
+    
+    public function update_city(){
+        $aUpdateData = $this->params->data;
+        $this->City->save($aUpdateData);
+        
+        $data = array(
+            'success' => true,
         );
         $this->layout = 'ajax';
         $this->set('data', $data);

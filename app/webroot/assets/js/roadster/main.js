@@ -60,6 +60,7 @@ $(document).ready(function(){
     })
 })
 
+var oCityData = {};
 var aTargetLocations = [];
 var aEnemies = [];
 
@@ -101,6 +102,7 @@ $.ajax({
             map.setView([lat, lng], 17);
             oPlayer.setLatLng([lat, lng]).addTo(map);
             
+            oCityData = res.data;
             // start game
             $('#infoPanel').html('Welcome to '+res.data.name+', population: '+res.data.population +'. Find nearest train station!').fadeIn();
             $('input[name="city_name"]').val(res.data.name);
@@ -177,10 +179,20 @@ function fetch_targets(){
                 }, 500);
             }
             else {
-                $('#infoPanel').append('<br /> No targets around! Automatically restarting...');
-                setTimeout(function(){
-                    window.location.reload(true);
-                }, 3000)
+                // mark that city as not playable
+                $.ajax({
+                    url: '/leaflet/update_city',
+                    type: 'post',
+                    data: {
+                        id: oCityData.id,
+                        is_active: 0
+                    },
+                    dataType: 'json',
+                    success: function(){
+                        window.location.reload(true);
+                    }
+                })
+                
 
             }
         }
