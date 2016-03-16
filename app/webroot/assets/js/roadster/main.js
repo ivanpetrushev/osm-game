@@ -104,7 +104,7 @@ $.ajax({
             
             oCityData = res.data;
             // start game
-            $('#infoPanel').html('Welcome to '+res.data.name+', population: '+res.data.population +'. Find nearest train station!').fadeIn();
+            $('#infoPanel').html('Welcome to '+res.data.name+', once population: '+res.data.population +', now: 0.<br />Find nearest train station!').fadeIn();
             $('input[name="city_name"]').val(res.data.name);
             //fetch_buildings();
             
@@ -172,7 +172,7 @@ function fetch_targets(){
             }
 
             if (aTargetLocations.length > 0){
-                $('#infoPanel').append('<br /> '+aTargetLocations.length+ ' targets around! <br /><div id="distance"></div><div id="enemies"></div>');
+                $('#infoPanel').append('<br /> '+aTargetLocations.length+ ' train stations around! <br /><div id="distance"></div><div id="enemies"></div>');
 
                 setTimeout(function(){
                     fetch_buildings();
@@ -316,6 +316,7 @@ function fetch_ways(){
             
             // game is ready
             $('#splashscreen').animate({width:'toggle'},350);
+            $('#splashscreen').html('');
         }
     })
 }

@@ -13,7 +13,7 @@
         <div id="splashscreen"><div class='loading' data-text='Loading world'>Loading world</div></div>
         <ul id="menu">
             <!--<li class="scores">Scores</li>-->
-            <li class="howto">Howto</li>
+            <li class="howto">What?</li>
         </ul>
         <div id='ctMap'></div>
         <div id='ctMapNextLevel'></div>
@@ -43,7 +43,14 @@
             </table>
         </div>
         <div id='ctHowto'>
+            You suddenly wake up in a barren city. Once a human territory, now there are only zombies and you. <br />
+            In the near distance you can hear a train whistle. Maybe trains are still going? <br />
             Use arrow keys to move. Escape from enemies. Use buildings to get cover.
+        </div>
+        
+        <div id='ctDead'>
+            <img src="/img/icons/512x512/graveyard-rip-icon.png" style="width: 128px; float: left;"/>
+            <p>You are dead.</p>
         </div>
         
         <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>

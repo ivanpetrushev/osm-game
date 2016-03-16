@@ -1,10 +1,10 @@
 var oIconEnemyGreen = L.MakiMarkers.icon({
-    icon: "rocket",
+    icon: "danger",
     color: "#0b0",
     size: "m"
 });
 var oIconEnemyRed = L.MakiMarkers.icon({
-    icon: "rocket",
+    icon: "danger",
     color: "#f00",
     size: "m"
 });
@@ -213,7 +213,8 @@ Enemy.prototype.moveTowardsPlayer = function(){
 
     var iNewDistance = oPlayer.getLatLng().distanceTo(oMoveCoords);
     if (iNewDistance < 20){
-        alert('You die!');
+        bGameRunning = false;
+        $('#ctDead').fadeIn();
     }
 }
 

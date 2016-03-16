@@ -121,6 +121,23 @@ body { margin:0; padding:0; }
     overflow-x: hidden;
 }
 
+#ctDead {
+    display: none;
+    position: absolute;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: rgba(255, 255, 255, 0.8);
+    top: 20vh;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+    max-height: 50vh;
+    /*overflow-y: scroll;*/
+    overflow-x: hidden;
+}
+
 #ctMapNextLevel {
     display: none;
     position: absolute;
