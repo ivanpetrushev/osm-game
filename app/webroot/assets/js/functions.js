@@ -235,7 +235,9 @@ function moveOnTheRoad(entity, oCurrentCoords, iAngle){
     return oNewCoords;
 }
 
-function getRawNodeGraph(){
+function getRawNodeGraph(bDontSearchBounds){
+    if (typeof bDontSearchBounds == 'undefined') bDontSearchBounds = false;
+    
     if (! oRawNodeGraph){
 //    if (true){
         oRawNodeGraph = {};
@@ -243,7 +245,7 @@ function getRawNodeGraph(){
         for (var iNodeId in aRoadNodeUsageMap){
             var node = aRoadNodeElements[iNodeId];
             var latlng = L.latLng({lat: node.lat, lon: node.lon});
-            if (oBounds.contains(latlng)){
+            if (bDontSearchBounds || oBounds.contains(latlng)){
                 if (typeof oRawNodeGraph[iNodeId] == 'undefined'){
                     oRawNodeGraph[iNodeId] = [];
                 }

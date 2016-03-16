@@ -235,7 +235,6 @@ Enemy.prototype.snapToNearestRoad = function(){
     
     var oNewCoords = L.latLng(aRoadNodeElements[iMinKey].lat, aRoadNodeElements[iMinKey].lon);
     this.setLatLng(oNewCoords);
-//    map.setView(oNewCoords);
     
     this.snapped_on_node = aRoadNodeElements[iMinKey];
 }
