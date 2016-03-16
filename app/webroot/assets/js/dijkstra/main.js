@@ -30,28 +30,39 @@ var aEnemies = [];
 map.on('click', function(e){
     var oDstLatLng = e.latlng;
     
-    var oIcon = (sCurrentlySelecting == 'from') ? oIconEnemyGreen : oIconEnemyRed;
-    var oEnemy = L.marker([oDstLatLng.lat, oDstLatLng.lng], {icon: oIcon, draggable: true, targetType: sCurrentlySelecting});
-    oEnemy.addTo(map);
-    var x = new Enemy(oEnemy);
+    var x = false;
+    for (var i in aEnemies){
+        if (aEnemies[i].marker.options.targetType == sCurrentlySelecting){
+            x = aEnemies[i];
+            x.setLatLng(oDstLatLng);
+        }
+    }
+    
+    if (! x){
+        var oIcon = (sCurrentlySelecting == 'from') ? oIconEnemyGreen : oIconEnemyRed;
+        var oEnemy = L.marker([oDstLatLng.lat, oDstLatLng.lng], {icon: oIcon, draggable: true, targetType: sCurrentlySelecting});
+        oEnemy.addTo(map);
+        x = new Enemy(oEnemy);
+        aEnemies.push(x);
+        
+        oEnemy.on('dragend', function(e){
+            e.target.enemy.snapToNearestRoad();
+            var sCurrentlySelecting = e.target.options.targetType;
+
+            $('input[name='+sCurrentlySelecting+']').val(e.target.enemy.snapped_on_node.id);
+
+            var from = $('input[name=from]').val();
+            var to = $('input[name=to]').val();
+
+            drawRoute(from, to);
+        })
+    }
+    
     x.snapToNearestRoad();
-    aEnemies.push(x);
     
     $('input[name='+sCurrentlySelecting+']').val(x.snapped_on_node.id);
     if (sCurrentlySelecting == 'from') sCurrentlySelecting = 'to';
     else if (sCurrentlySelecting == 'to') sCurrentlySelecting = 'from';
-    
-    oEnemy.on('dragend', function(e){
-        e.target.enemy.snapToNearestRoad();
-        var sCurrentlySelecting = e.target.options.targetType;
-        
-        $('input[name='+sCurrentlySelecting+']').val(e.target.enemy.snapped_on_node.id);
-        
-        var from = $('input[name=from]').val();
-        var to = $('input[name=to]').val();
-
-        drawRoute(from, to);
-    })
 })
 
 
@@ -137,6 +148,14 @@ function fetch_ways(){
         }
     })
 }
+
+$('#btnPickFrom').click(function(e){
+    sCurrentlySelecting = 'from';
+})
+
+$('#btnPickTo').click(function(e){
+    sCurrentlySelecting = 'to';
+})
 
 $('#btnFind').click(function(e){
     var from = $('input[name=from]').val();

@@ -15,8 +15,8 @@
         
         <div id="ctDestinations">
             <form>
-                From: <input type="text" name="from" /> <input type="button" value="Pick" /> <br />
-                To: <input type="text" name="to" /><input type="button" value="Pick" /> <br />
+                From: <input type="text" name="from" /> <input type="button" value="Pick" id="btnPickFrom" /> <br />
+                To: <input type="text" name="to" /><input type="button" value="Pick" id="btnPickTo"/> <br />
                 <input type="button" value="Find route" id="btnFind" />
             </form>
         </div>
